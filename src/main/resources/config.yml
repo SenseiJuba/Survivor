@@ -1,0 +1,182 @@
+#######################################################
+# Practice Config
+# For info and help, check the Git repo over here:
+# https://github.com/RoccdoDev/Practice
+# More specifically, config documentation can be found over here:
+# https://rocco.dev/practice/config
+# If you wish to contact me privately, send me an email:
+# hey@rocco.dev
+# You may also find me on Discord: RoccoDev#1337
+# As well as on SpigotMC.org: Rocco
+########################################################
+
+########################################################
+# DOCUMENTATION
+#
+# You can use color codes with '&' (e.g., &a).
+#
+# Some config entries support parameters:
+# %1$s represents the first parameter,
+# %2$s represents the second parameter,
+# and so on.
+#########################################################
+
+## BOOLEANS
+
+# Enable /report
+bool.report: true
+
+# Enable /ping
+bool.ping: true
+
+# Enable /duel
+bool.duel: true
+
+
+## PREFIXES
+
+# Prefix for all information plugin messages
+prefix.info: "&a&lPractice §8»§7 "
+
+# Prefix for all error plugin messages
+prefix.error: "&c&lPractice §8»§7 "
+
+
+## ERRORS
+
+# This error is thrown when the user is missing the required permission to do the action.
+# Parameters:
+# %1$s - The required permission (e.g., practice.report)
+error.permission: "Invalid permissions. (Missing %1$s)"
+
+# This error is thrown when the plugin could not find the player specified.
+# Parameters:
+# %1$s - The player name that couldn't be found
+error.notfound: "Could not find player %1$s."
+
+# This error is thrown when the player is kicked from an arena.
+# Parameters:
+# %1$s - The reason for the kick
+error.arena.kick: "You have been kicked from the arena. Reason:&c %1$s"
+
+# This error is thrown when a player tries to spectate a player who isn't in an arena.
+# Parameters:
+# %1$s - The player name
+error.arena.playernotfound: "Player %1$s is not playing."
+
+
+## Timer
+# Text show on actionbar for timer before start
+# %1$s - timer
+
+startin: "La partie va commencé dans : %1$s second(s)"
+
+## DEATH
+# death message
+# %1$s - Player name
+# %2$s - Killer name
+
+death.msg: "Vous êtes mort par un %2$s"
+death.msg.all: "%1$s est mort par un %2$s, allez le réssucitez"
+
+## Inventory
+
+# Vote Map Inventory's name
+
+inventory.votemap: "Votez pour la map"
+
+# Item in Vote Map Inventory
+# %1$s - Map name
+
+inventory.votemap.pane: "Votez pour la map %1$s"
+inventory.votemap.lore: "Clicker sur l'item pour/Voter pour la map"
+
+## ATOUT
+
+# Name
+
+atout.barricade.name: "Barricade"
+
+# This message is throw when a player use a atout
+# %1$s - Player name
+
+atout.use: "" #to him in Title
+atout.use.all: "%1$s a utilisé l'atout barricade" #to each player in broadcast
+
+# The message shown when a match ends.
+# Parameters:
+# %1$s - The winning team (team name)
+# %2$s - The winning team (player list - Player1, Player2)
+# %3$s - The winning team (no. players)
+# %4$s - Spectators (Player1, Player2)
+# %5$s - Spectators (amount)
+# %6$s - Info prefix (see prefix.info)
+# Note: use \n for newlines.
+arena.end: "The match has ended.\n%6$s&aWinners (%3$s): %2$s\n%6$s&eSpectators (%5$s): %4$s"
+
+
+## /ping COMMAND
+
+# The message that is sent as a result of the /ping command.
+# Parameters:
+# %1$s - The player
+# %2$s - The player's ping, in milliseconds.
+ping.result: "%1$s's ping is %2$sms."
+
+
+## REPORT
+
+# The message shown to moderators when a report is sent.
+# Parameters:
+# %1$s - The sender
+# %2$s - The reported player
+# %3$s - The reason
+report.notification: "&a%2$s &7has been reported by %1$s for &a%3$s&7. Click to investigate."
+
+# The cooldown (in seconds) a player has to wait before submitting a new report.
+report.cooldown.amount: 30
+
+# The message shown when a player has to wait before submitting a new report.
+# Parameters:
+# %1$s - The seconds left
+report.cooldown.error: "You need to wait &c%1$s &7more seconds before submitting a report."
+
+# The message shown when a report has been succesfully sent.
+report.successful: "Succesfully submitted report."
+
+
+## STATS
+
+# The message shown by the /stats command.
+# Parameters:
+# %1$s - Kills
+# %2$s - Deaths
+# %3$s - Victories
+# %4$s - Games played
+# %5$s - Forfeits
+# %6$s - ELO
+# %7$s - Player name
+# %8$s - Info prefix (see prefix.info)
+stats.overview: "Showing &a%7$s&7's stats:\n%8$sKills:&a %1$s&7\n%8$sDeaths:&a %2$s&7\n%8$sVictories:&a %3$s&7\n%8$sPlayed:&a %4$s&7\n%8$sForfeits:&a %5$s&7\n%8$sElo:&a %6$s"
+
+## SCOREBOARDS
+
+# Les messages affichées dans les scoreboards pour chaque joueur
+# Attention, c'est du bas vers le haut avec pour séparateur /s/ et /ss/ pour une ligne vide (e.g : "blabla /s/blabla /s//ss//s/Blablabla")
+# Paramètres:
+# /n/ - Nom du joueur
+# /k/ - Kills du joueur
+# /d/ - Morts du joueur
+# /v/ - Victoires du joueur
+# /g/ - Parties jouées du joueur
+# /f/ - Forfait du joueur
+# /e/ - Elo du joueur
+
+scoreboard.lobby: "www.test.fr /s//ss//s/&fELO :&a /e/ /s/"
+
+scoreboard.match: "www.test.fr /s//ss//s/&fELO :&a /e/ /s/"
+
+scoreboard.party: "www.test.fr /s//ss//s/&fELO :&a /e/ /s/"
+
+scoreboard.queue: "www.test.fr /s//ss//s/&fELO :&a /e/ /s/"
+
