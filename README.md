@@ -1,5 +1,5 @@
 ![tête de zombie](https://fr-minecraft.net/img/blocs/144_02.png)
-# _Helleria - Survivor_
+# _Hellaria - Survivor_
 
 ## Plugin Survivor 
 
