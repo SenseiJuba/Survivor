@@ -9,12 +9,20 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MobManager implements Listener {
 
     private HashMap<Zombie, Entity> zombies;
     private HashMap<Dog, Entity> dogs;
+    private List<AbstractMob> mobs;
+
+    public MobManager(){
+        mobs = new ArrayList<>();
+        registerMobs();
+    }
 
     @EventHandler
     public void onSpawn(CreatureSpawnEvent e){
@@ -32,9 +40,18 @@ public class MobManager implements Listener {
         }
     }
 
+    private void registerMobs(){
+        registerMob(new Dog());
+        registerMob(new Zombie());
+    }
+
+    private void registerMob(AbstractMob mob){ mobs.add(mob); }
+
     public HashMap<Zombie, Entity> getZombies() {
         return zombies;
     }
+
+    public List<AbstractMob> listMobs() { return mobs; }
 
     public void setZombies(HashMap<Zombie, Entity> zombies) {
         this.zombies = zombies;

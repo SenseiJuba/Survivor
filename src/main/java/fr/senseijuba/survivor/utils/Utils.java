@@ -2,6 +2,7 @@ package fr.senseijuba.survivor.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -265,5 +266,54 @@ public class Utils
 		else{
 			System.out.println("le monde n'existe pas ");
 		}
+	}
+
+	public static String percentToBar(double score, double max){
+		double percent = StrictMath.round(score/max);
+		int dizaine = (int) (percent/10%10);
+		int rest = 10 - dizaine;
+		String bar = "§8[§b";
+
+		for(int time = dizaine; time>0; time++){
+			bar = bar + "■";
+		}
+
+		bar = bar + "§7";
+
+		for(int time = rest; time>0; time++){
+			bar = bar + "■";
+		}
+
+		bar = bar + "§8]";
+		return bar;
+	}
+
+	public static String nbToK(double n){
+		String ni = n + "";
+		if(n>=1000){
+			n = n/1000;
+			DecimalFormat df = new DecimalFormat("0.0");
+			ni = df.format(n);
+			switch(ni){
+				case("1.0"):
+					n = 1;
+					break;
+				case("2.0"):
+					n = 2;
+					break;
+				case("3.0"):
+					n = 3;
+					break;
+				case("4.0"):
+					n = 4;
+					break;
+				case("5.0"):
+					n = 5;
+					break;
+			}
+
+			ni = ni + "k";
+		}
+		return ni;
 	}
 }

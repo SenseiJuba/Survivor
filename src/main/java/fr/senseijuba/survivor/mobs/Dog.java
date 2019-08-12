@@ -11,12 +11,13 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.Random;
 
-public abstract class Dog extends AbstractMob {
+public class Dog extends AbstractMob{
 
     public Dog() {
-        super(EntityType.WOLF, 0, 20, null, null, 100);
+        super(EntityType.WOLF, 0, 20, 100);
     }
 
+    @Override
     public void spawnMob(List<Location> loctableau, int nb){
 
         Player p = null;

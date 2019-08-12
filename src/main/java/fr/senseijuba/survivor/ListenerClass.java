@@ -1,10 +1,16 @@
 package fr.senseijuba.survivor;
 
+import fr.senseijuba.survivor.commands.GetWeapon;
+import fr.senseijuba.survivor.commands.SurvivorCommand;
 import fr.senseijuba.survivor.database.Mariadb;
+import fr.senseijuba.survivor.database.player.PlayerData;
 import fr.senseijuba.survivor.database.player.PlayerDataManager;
+import fr.senseijuba.survivor.managers.GameState;
 import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.map.Zone;
 import fr.senseijuba.survivor.utils.Cuboid;
+import fr.senseijuba.survivor.utils.ScoreboardSign;
+import fr.senseijuba.survivor.utils.Title;
 import fr.senseijuba.survivor.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,10 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -27,18 +30,168 @@ import java.sql.SQLException;
 
 public class ListenerClass implements Listener {
 
+    Survivor inst = Survivor.getInstance();
+    PlayerDataManager dataManager = inst.dataManager;
+    Mariadb db = inst.mariadb;
 
+    public ListenerClass() throws ClassNotFoundException {
+    }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) throws SQLException {
         Survivor.getInstance().getPlayerManager().getMoney().putIfAbsent(e.getPlayer().getUniqueId(), 3000);
+        Survivor.getInstance().getPlayerManager().getKills().putIfAbsent(e.getPlayer().getUniqueId(), 0);
+        Survivor.getInstance().getPlayerManager().getDeaths().putIfAbsent(e.getPlayer().getUniqueId(), 0);
+
         db.registerPlayer(e.getPlayer());
         dataManager.loadPlayerData(e.getPlayer());
+        e.getPlayer().teleport(inst.getLobbySpawn());
+        Title.sendTitle(e.getPlayer(), 5, 20, 5, "§cSurvivor", "bienvenue");
+
+        Player p = e.getPlayer();
+        ScoreboardSign scoreboardSign = new ScoreboardSign(p, "§eSURVIVOR");
+
+        PlayerData data = inst.dataPlayers.get(p);
+        String xp = Utils.nbToK(data.getLvl());
+        String xpmax = Utils.nbToK(data.getXptolvl());
+
+        scoreboardSign.create();
+        scoreboardSign.setLine(13, "§fVotre level: §7" + data.getLvl() + "☆");
+        scoreboardSign.setLine(12, "");
+        scoreboardSign.setLine(11, "§fProgression: §b" + xp + "§7/§e" + xpmax);
+        scoreboardSign.setLine(10, Utils.percentToBar(data.getLvl(), data.getXptolvl()));
+        scoreboardSign.setLine(9, "§7");
+        scoreboardSign.setLine(8, "§fGrade: a faire");
+        scoreboardSign.setLine(7, "§e");
+        scoreboardSign.setLine(6, "Parties jouées:" + data.getGameplayed());
+        scoreboardSign.setLine(5, "Vague max: " + data.getMaxwaves());
+        scoreboardSign.setLine(4, "Total kills: " + data.getKills());
+        scoreboardSign.setLine(3, "Total morts: " + data.getDeaths());
+        scoreboardSign.setLine(2, "§8");
+        scoreboardSign.setLine(1, "§6play.hellaria.fr");
+
+        new BukkitRunnable()
+        {
+
+            ScoreboardSign sc = scoreboardSign;
+            int timer = 0;
+            String string;
+
+            @Override
+            public void run()
+            {
+                switch (timer){
+                    case 0:
+                        string = "§cp§elay.hellaria.fr";
+                        break;
+                    case 1:
+                        string = "§4p§cl§eay.hellaria.fr";
+                        break;
+                    case 2:
+                        string = "§cp§4l§ca§ey.hellaria.fr";
+                        break;
+                    case 3:
+                        string = "§ep§cl§4a§cy§e.hellaria.fr";
+                        break;
+                    case 4:
+                        string = "§epl§ca§4y§c.§ehellaria.fr";
+                        break;
+                    case 5:
+                        string = "§epla§cy§4.§ch§eellaria.fr";
+                        break;
+                    case 6:
+                        string = "§eplay§c.§4h§ce§ellaria.fr";
+                        break;
+                    case 7:
+                        string = "§eplay.§ch§4e§cl§elaria.fr";
+                        break;
+                    case 8:
+                        string = "§eplay.h§ce§4l§cl§earia.fr";
+                        break;
+                    case 9:
+                        string = "§eplay.he§cl§4l§ca§eria.fr";
+                        break;
+                    case 10:
+                        string = "§eplay.hel§cl§4a§cr§eia.fr";
+                        break;
+                    case 11:
+                        string = "§eplay.hell§ca§4r§ci§ea.fr";
+                        break;
+                    case 12:
+                        string = "§eplay.hella§cr§4i§ca§e.fr";
+                        break;
+                    case 13:
+                        string = "§eplay.hellar§ci§4a§c.§efr";
+                        break;
+                    case 14:
+                        string = "§eplay.hellari§ca§4.§cf§er";
+                        break;
+                    case 15:
+                        string = "§eplay.hellaria§c.§4f§cr";
+                        break;
+                    case 16:
+                        string = "§eplay.hellaria.§cf§4r";
+                        break;
+                    case 17:
+                        string = "§eplay.hellaria.f§cr";
+                        break;
+                    case 18:
+                        string = "§eplay.hellaria.fr";
+                        break;
+                    case 20*9:
+                        timer = 0;
+                        break;
+                }
+
+                scoreboardSign.setLine(1, string);
+
+                if(!inst.gameState.equals(GameState.SPAWN)){
+                    scoreboardSign.destroy();
+                    cancel();
+                }
+
+                timer++;
+            }
+        }.runTaskLater(inst, 1);
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) throws SQLException{
-        dataManager.updatePlayerData(e.getPlayer());
+        dataManager.savePlayerData(e.getPlayer());
+    }
+
+    @Deprecated
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent e){
+        if(e.getMessage().startsWith("/"))
+            return;
+
+        int lvl = inst.getDataPlayers().get(e.getPlayer()).getLvl();
+        String suffix;
+
+        if(lvl>=40)
+            suffix = "§2";
+        else if(lvl>=30)
+            suffix = "§3";
+        else if(lvl>=20)
+            suffix = "§6";
+        else if(lvl>=10)
+            suffix = "§f";
+        else
+            suffix = "§7";
+
+        if(lvl>50)
+            suffix = "§4[§6" + lvl/10%10 + "§2" + lvl%10 + "§3☆§5]";
+        else
+            suffix = suffix + "[" + lvl + "☆]";
+
+        String msg = suffix + "§f " + e.getPlayer().getDisplayName() + " > " + e.getMessage();
+
+        for(Player player : Bukkit.getOnlinePlayers()){
+            player.sendMessage(msg);
+        }
+
+        e.setCancelled(true);
     }
 
     @EventHandler

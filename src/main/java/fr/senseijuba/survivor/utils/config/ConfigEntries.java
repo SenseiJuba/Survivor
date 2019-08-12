@@ -19,7 +19,7 @@ import java.io.IOException;
 
 public class ConfigEntries {
 
-    public static String INFO_PREFIX, ERROR_PREFIX;
+    public static String INFO_PREFIX, ERROR_PREFIX, CHAT_PREFIX;
 
     public static String E_PERM, E_404, E_KICK, E_NOTINARENA;
 
@@ -57,6 +57,7 @@ public class ConfigEntries {
     public static void init(FileConfiguration config) {
         INFO_PREFIX = c(config.getString("prefix.info"));
         ERROR_PREFIX = c(config.getString("prefix.error"));
+        CHAT_PREFIX = c(config.getString("prefix.chat"));
 
         Prefix.INFO = INFO_PREFIX;
         Prefix.ERROR = ERROR_PREFIX;

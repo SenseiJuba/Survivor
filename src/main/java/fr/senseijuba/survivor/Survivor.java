@@ -2,6 +2,8 @@ package fr.senseijuba.survivor;
 
 import fr.senseijuba.survivor.commands.GetWeapon;
 import fr.senseijuba.survivor.commands.SurvivorCommand;
+import fr.senseijuba.survivor.cycle.AutoStart;
+import fr.senseijuba.survivor.cycle.GameCycle;
 import fr.senseijuba.survivor.database.Mariadb;
 import fr.senseijuba.survivor.database.player.PlayerData;
 import fr.senseijuba.survivor.database.player.PlayerDataManager;
@@ -53,12 +55,14 @@ public class Survivor extends JavaPlugin {
     private List<Player> hasVoted;
     public List<Map> maps;
     public List<String> tips;
-    public GameState gameState;
+    @Getter @Setter public GameState gameState;
     private Map currentMap;
     private WeaponManager weaponManager;
     private PlayerManager playerManager;
     private MobManager mobManager;
     private BarricadeManager barricadeManager;
+    public GameCycle gameCycle;
+    public AutoStart autoStart;
     public int timer = 60;
 
     @Override
@@ -80,6 +84,9 @@ public class Survivor extends JavaPlugin {
         }
 
         dataManager = new PlayerDataManager();
+        gameCycle = new GameCycle(instance);
+        autoStart = new AutoStart(instance);
+        this.autoStart.runTaskTimer(this, 0, 1);
 
         weaponManager = new WeaponManager();
         playerManager = new PlayerManager();
@@ -105,7 +112,11 @@ public class Survivor extends JavaPlugin {
             {
                 SurvivorCommand survivorcommand = new SurvivorCommand();
 
-                l = new ListenerClass();
+                try {
+                    l = new ListenerClass();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
 
                 getServer().getPluginManager().registerEvents(l, instance);
                 getCommand("getWeapon").setExecutor(new GetWeapon());
@@ -136,7 +147,11 @@ public class Survivor extends JavaPlugin {
     }
 
     public void onDisable(){
-        mariadb.disconnect();
+        try {
+            mariadb.disconnect();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 

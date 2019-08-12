@@ -1,7 +1,6 @@
 package fr.senseijuba.survivor.spawn;
 
 import fr.senseijuba.survivor.Survivor;
-import fr.senseijuba.survivor.spawn.item.SpawnItemAction;
 import fr.senseijuba.survivor.spawn.items.SimpleSpawnItem;
 import fr.senseijuba.survivor.utils.ItemBuilder;
 import org.apache.commons.lang3.text.WordUtils;

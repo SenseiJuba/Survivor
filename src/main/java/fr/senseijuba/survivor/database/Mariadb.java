@@ -6,6 +6,7 @@ import java.util.List;
 
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.database.player.PlayerData;
+import fr.senseijuba.survivor.utils.Title;
 import org.bukkit.entity.Player;
 
 public class Mariadb {
@@ -56,6 +57,8 @@ public class Mariadb {
                     "`maxwaves` INT(11) NULL DEFAULT '0', " +
                     "`kills` INT(11) NULL DEFAULT '0', " +
                     "`deaths` INT(11) NULL DEFAULT '0', " +
+                    "`lvl` INT(11) NULL DEFAULT '0', " +
+                    "`xp` INT(11) NULL DEFAULT '0', " +
                     "PRIMARY KEY (`id`)" +
                     ") " +
                     "COLLATE='latin1_swedish_ci' " +
@@ -134,7 +137,7 @@ public class Mariadb {
 
     //death
     public int getDeaths(Player player){ return inst.getDataPlayers().containsKey(player) ? inst.getDataPlayers().get(player).getDeaths() : 0; }
-    public void addGDeaths(Player player, int amount){
+    public void addDeaths(Player player, int amount){
         if(inst.getDataPlayers().containsKey(player)){
             PlayerData data = inst.getDataPlayers().get(player);
             int i = data.getDeaths() + amount;
@@ -143,10 +146,36 @@ public class Mariadb {
         }
     }
 
+    //lvl
+    public int getLvl(Player player){ return inst.getDataPlayers().containsKey(player) ? inst.getDataPlayers().get(player).getLvl() : 0; }
+    public void addLvl(Player player, int amount){
+        if(inst.getDataPlayers().containsKey(player)){
+            PlayerData data = inst.getDataPlayers().get(player);
+            int i = data.getLvl() + amount;
+            data.setLvl(i);
+            inst.getDataPlayers().replace(player, data);
+        }
+    }
+
+    //xp
+    public double getXp(Player player){ return inst.getDataPlayers().containsKey(player) ? inst.getDataPlayers().get(player).getXp() : 0; }
+    public void addXp(Player player, int amount){
+        if(inst.getDataPlayers().containsKey(player)){
+            PlayerData data = inst.getDataPlayers().get(player);
+            double i = data.getXp() + amount;
+            data.setXp(i);
+            if(data.updateXp()){
+                Title.sendTitle(player, 0, 20, 5, "§e▲ Level UP ▲");
+            }
+            inst.getDataPlayers().replace(player, data);
+        }
+    }
+
+
     public PlayerData createPlayerData(Player player) throws SQLException {
 
         if(!inst.getDataPlayers().containsKey(player)) {
-            PreparedStatement query = conn.prepareStatement("SELECT gameplayed, maxwaves, kills, deaths FROM playerdata WHERE uuid = ?");
+            PreparedStatement query = conn.prepareStatement("SELECT gameplayed, maxwaves, kills, deaths, lvl, xp FROM playerdata WHERE uuid = ?");
             query.setString(1, player.getUniqueId().toString());
             ResultSet result = query.executeQuery();
 
@@ -154,12 +183,16 @@ public class Mariadb {
             int maxwaves = 0;
             int kills = 0;
             int deaths = 0;
+            int lvl = 0;
+            int xp = 0;
 
             while (result.next()) {
                 gameplayed = result.getInt("gameplayed");
                 maxwaves = result.getInt("maxwaves");
                 kills = result.getInt("kills");
                 deaths = result.getInt("deaths");
+                lvl = result.getInt("lvl");
+                xp = result.getInt("xp");
             }
 
             PlayerData data = new PlayerData();
@@ -167,11 +200,15 @@ public class Mariadb {
             data.setMaxwaves(maxwaves);
             data.setKills(kills);
             data.setDeaths(deaths);
+            data.setLvl(lvl);
+            data.setXp(xp);
             return data;
         }
 
         return inst.getDataPlayers().get(player);
     }
+
+    //TODO LVL
 
     public void updatePlayerData(Player player) throws SQLException {
 
@@ -183,7 +220,8 @@ public class Mariadb {
             datas.add(data.getMaxwaves());
             datas.add(data.getKills());
             datas.add(data.getDeaths());
-            PreparedStatement query = conn.prepareStatement("UPDATE playerdata SET gameplayed = ?, maxwaves = ?, kills = ?, deaths = ? WHERE uuid = ?");
+            datas.add(data.getLvl());
+            PreparedStatement query = conn.prepareStatement("UPDATE playerdata SET gameplayed = ?, maxwaves = ?, kills = ?, deaths = ?, lvl = ?, xp = ? WHERE uuid = ?");
 
             int i = 1;
             for(int d : datas){
@@ -191,6 +229,8 @@ public class Mariadb {
                 i++;
             }
 
+            query.setDouble(i, data.getXp());
+            i++;
             query.setString(i, player.getUniqueId().toString());
             query.executeUpdate();
             query.close();

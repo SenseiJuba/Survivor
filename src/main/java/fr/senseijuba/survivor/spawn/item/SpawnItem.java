@@ -14,7 +14,4 @@ public abstract class SpawnItem {
     public void give(Player p){
         p.getInventory().setItem(getSlot(), getItem());
     }
-
-    public abstract SpawnItemAction getAction();
-
 }

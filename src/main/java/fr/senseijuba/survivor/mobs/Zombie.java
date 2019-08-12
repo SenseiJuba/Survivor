@@ -14,12 +14,13 @@ import java.util.Random;
 
 import static java.lang.Math.round;
 
-public abstract class Zombie extends AbstractMob {
+public class Zombie extends AbstractMob {
 
     public Zombie() {
-        super(EntityType.ZOMBIE, 0, 20, null, null, 100);
+        super(EntityType.ZOMBIE, 0, 20, 100);
     }
 
+    @Override
     public void spawnMob(List<Location> loctableau, int nb){
 
         Player p = null;

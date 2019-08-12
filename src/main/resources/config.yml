@@ -36,11 +36,13 @@ bool.duel: true
 ## PREFIXES
 
 # Prefix for all information plugin messages
-prefix.info: "&a&lPractice §8»§7 "
+prefix.info: "&a&lSurvivor §8»§7 "
 
 # Prefix for all error plugin messages
-prefix.error: "&c&lPractice §8»§7 "
+prefix.error: "&c&lSurvivor §8»§7 "
 
+# Prefix for all chat messages
+prefix.chat: "&c[&lSurvivor&f&c]"
 
 ## ERRORS
 

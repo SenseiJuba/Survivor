@@ -1,7 +1,10 @@
 package fr.senseijuba.survivor.map;
 
 import fr.senseijuba.survivor.Survivor;
+import fr.senseijuba.survivor.cycle.GameCycle;
 import fr.senseijuba.survivor.managers.GameState;
+import fr.senseijuba.survivor.spawn.item.SpawnItem;
+import fr.senseijuba.survivor.spawn.items.SimpleSpawnItem;
 import fr.senseijuba.survivor.utils.ItemBuilder;
 import fr.senseijuba.survivor.utils.config.ConfigEntries;
 import org.bukkit.Bukkit;
@@ -16,7 +19,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerInventoryEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -30,10 +34,17 @@ public class VoteMapManager implements Listener {
 
     Survivor inst;
     Inventory voteInv = Bukkit.createInventory(null, 9*6, ConfigEntries.INVENTORY_VOTEMAP);
+    ItemStack voteItem;
     int votant = 0;
 
     public VoteMapManager(Survivor inst){
         this.inst = inst;
+
+        voteItem = new ItemBuilder(Material.NAME_TAG)
+                .name(ConfigEntries.INVENTORY_VOTEMAP)
+                .enchantment(Enchantment.DEPTH_STRIDER)
+                .addflag(ItemFlag.HIDE_ENCHANTS)
+                .build();
 
         new BukkitRunnable()
         {
@@ -43,7 +54,7 @@ public class VoteMapManager implements Listener {
                 int i = 0;
                 if(inst.timer <= 3)
                     for(Player player : Bukkit.getOnlinePlayers()){
-                        player.getInventory().remove(Material.NAME_TAG); //TODO verif material
+                        player.getInventory().remove(voteItem);
                     }
                     cancel();
 
@@ -75,10 +86,30 @@ public class VoteMapManager implements Listener {
     }
 
     @EventHandler
+    public void onJoin(PlayerJoinEvent e){
+        if(inst.gameState.equals(GameState.SPAWN)){
+            e.getPlayer().getInventory().setItem(0, voteItem);
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e){
+        Player player = e.getPlayer();
+
+        if(inst.gameState.equals(GameState.SPAWN)){
+            votant--;
+            inst.getVote().replace(inst.getPlayervote().get(player), inst.getVote().get(inst.getPlayervote().get(player)), inst.getVote().get(inst.getPlayervote().get(player)) - 1);
+            inst.getHasVoted().remove(player);
+            inst.getPlayervote().remove(player);
+        }
+    }
+
+    @EventHandler
     public void onClick(PlayerInteractEvent e){
-        if(e.getAction().equals(Action.RIGHT_CLICK_AIR) && e.getItem().equals(Material.NAME_TAG) && inst.gameState.equals(GameState.SPAWN)){ //TODO verif Material
+        if(e.getAction().equals(Action.RIGHT_CLICK_AIR) && e.getItem().isSimilar(voteItem) && inst.gameState.equals(GameState.SPAWN)){
             e.getPlayer().openInventory(voteInv);
         }
+        e.setCancelled(true);
     }
 
     @Deprecated
@@ -86,6 +117,10 @@ public class VoteMapManager implements Listener {
     public void onClick(InventoryClickEvent e){
 
         ItemStack item = e.getCurrentItem();
+
+        if(!(e.getWhoClicked() instanceof Player))
+            e.setCancelled(true);
+
         Player player = (Player) e.getWhoClicked();
 
         if(e.getClickedInventory().getName().equalsIgnoreCase(ConfigEntries.INVENTORY_VOTEMAP)){
@@ -130,6 +165,7 @@ public class VoteMapManager implements Listener {
             }
 
             player.closeInventory();
+            player.openInventory(voteInv);
             e.setCancelled(true);
 
         }

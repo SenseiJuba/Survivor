@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,6 +50,8 @@ public class PlayerManager
 	private HashMap<UUID, Long> lastHitDate;
 	private HashMap<UUID, SuperPower> powers;
 	private HashMap<UUID, Integer> money;
+	@Getter private HashMap<UUID, Integer> kills;
+	@Getter private HashMap<UUID, Integer> deaths;
 	private HashMap<Player, Player> disguised;
 	private HashMap<Player, Team> teamCartDirection;
 	private HashMap<UUID, FireCause> fireCause;
@@ -83,6 +86,8 @@ public class PlayerManager
 		heavyBulletNb = new HashMap<>();
 		weaponsPlaces = new HashMap<>();
 		money = new HashMap<>();
+		kills = new HashMap<>();
+		deaths = new HashMap<>();
 
 		File check = new File(TF.getInstance().getDataFolder(), "players.yml");
 
@@ -855,5 +860,13 @@ public class PlayerManager
 
 	public void setMoney(HashMap<UUID, Integer> money) {
 		this.money = money;
+	}
+
+	public void addKills(Player player){
+		this.kills.put(player.getUniqueId(), this.kills.get(player.getUniqueId()) + 1);
+	}
+
+	public void addDeaths(Player player){
+		this.deaths.put(player.getUniqueId(), this.deaths.get(player.getUniqueId()) + 1);
 	}
 }
