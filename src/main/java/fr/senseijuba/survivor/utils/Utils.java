@@ -1,5 +1,7 @@
 package fr.senseijuba.survivor.utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.FileUtil;
 import org.bukkit.util.Vector;
 
 public class Utils
@@ -230,5 +233,37 @@ public class Utils
 		}
 
 		return nearest;
+	}
+
+	public static void saveWorld(World world) throws IOException {
+		File worldfile = world.getWorldFolder();
+		File backupfile = new File(Survivor.getInstance().getDataFolder(), ".backup/" + worldfile.getName());
+
+		if(!backupfile.exists()){
+			backupfile.createNewFile();
+		}
+
+		FileUtil.copy(worldfile, backupfile);
+	}
+
+	public static void restoreWorld(World world){
+		File worldfile = world.getWorldFolder();
+		File backupfile = new File(Survivor.getInstance().getDataFolder(), ".backup/" + worldfile.getName());
+
+		if(worldfile.exists()){
+			if(backupfile.exists()){
+				for(Player player : world.getPlayers()){
+					player.kickPlayer("Serveur closed (A modifié avec bungeecord");
+				}
+
+				FileUtil.copy(backupfile, worldfile);
+			}
+			else{
+				System.out.println("le monde n'a pas été enregistré");
+			}
+		}
+		else{
+			System.out.println("le monde n'existe pas");
+		}
 	}
 }
