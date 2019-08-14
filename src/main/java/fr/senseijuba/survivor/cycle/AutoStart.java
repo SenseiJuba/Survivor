@@ -114,6 +114,8 @@ public class AutoStart extends BukkitRunnable {
                 for(Player player : Bukkit.getOnlinePlayers())
                     player.teleport(mapvoted.getSpawnpoint());
 
+
+                inst.getPlayerManager().initDeathKills();
                 inst.setGameState(GameState.STARTED);
 
                 cancel();

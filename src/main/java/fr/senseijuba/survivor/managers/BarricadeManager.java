@@ -68,7 +68,7 @@ public class BarricadeManager implements Listener {
                         {
                             finish = true;
 
-                            if(p.isSneaking() || !barricade.isNearTo(p)){
+                            if(p.isSneaking() || !barricade.isNearTo(p.getLocation())){
                                 cancel();
                             }
 
@@ -94,7 +94,7 @@ public class BarricadeManager implements Listener {
 
     @EventHandler
     public void onUseAllBarricade(PlayerInteractEvent e){
-        if(e.getAction().equals(Action.RIGHT_CLICK_AIR) || e.getItem().equals(Survivor.getInstance().getAtouts().get(ConfigEntries.ATOUT_BARRICADE))){
+        if(e.getAction().equals(Action.RIGHT_CLICK_AIR) || e.getItem().equals(Survivor.getInstance().getSpecialItem().get(ConfigEntries.ATOUT_BARRICADE))){
             Title.sendTitle(e.getPlayer(), 0, 20, 10, ConfigEntries.ATOUT_BARRICADE, ConfigEntries.ATOUT_USE);
             Utils.broadcastMessage(e.getPlayer().getWorld(), ConfigEntries.format(ConfigEntries.ATOUT_USE_ALL, e.getPlayer()));
             for(Player p : e.getPlayer().getWorld().getPlayers()){
@@ -111,6 +111,4 @@ public class BarricadeManager implements Listener {
             }
         }
     }
-
-
 }

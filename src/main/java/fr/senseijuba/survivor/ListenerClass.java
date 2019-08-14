@@ -8,6 +8,7 @@ import fr.senseijuba.survivor.database.player.PlayerDataManager;
 import fr.senseijuba.survivor.managers.GameState;
 import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.map.Zone;
+import fr.senseijuba.survivor.mobs.Dog;
 import fr.senseijuba.survivor.utils.Cuboid;
 import fr.senseijuba.survivor.utils.ScoreboardSign;
 import fr.senseijuba.survivor.utils.Title;
@@ -17,11 +18,13 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -333,5 +336,82 @@ public class ListenerClass implements Listener {
 
         e.setCancelled(true);
         p.getInventory().removeItem(itemDrop);
+    }
+
+    public void onDeath(EntityDamageByEntityEvent e){
+        if(e.getEntity() instanceof Player){
+            if(!(e.getDamager() instanceof Player)){
+
+            }
+            else{
+                e.setCancelled(true);
+            }
+        }
+        else if(e.getEntity() instanceof Zombie){
+
+            fr.senseijuba.survivor.mobs.Zombie mob = null;
+
+            for(fr.senseijuba.survivor.mobs.Zombie zombie : inst.getMobManager().getZombies().keySet()){
+                if(inst.getMobManager().getZombies().get(zombie).equals(e.getEntity())){
+                    inst.getMobManager().getZombies().remove(zombie);
+                    mob = zombie;
+                }
+            }
+
+            if(e.getDamager() instanceof Player && mob != null){
+                inst.getPlayerManager().addMoney((Player) e.getDamager(), mob.getMoney());
+                inst.gameCycle.addKills((Player)e.getDamager());
+
+                ArmorStand armorStand = (ArmorStand) e.getEntity().getLocation().getWorld().spawnEntity(e.getEntity().getLocation(), EntityType.ARMOR_STAND);
+
+                armorStand.setCustomName("§e+" + mob.getMoney());
+                armorStand.setCustomNameVisible(false);
+                armorStand.setBasePlate(false);
+                armorStand.setGravity(false);
+                armorStand.setVisible(false);
+                armorStand.setSmall(true);
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        armorStand.remove();
+                        cancel();
+                    }
+                }.runTaskLater(inst, 10);
+            }
+        }
+        else if(e.getEntity() instanceof Wolf){
+
+            Dog mob = null;
+
+            for(Dog dog : inst.getMobManager().getDogs().keySet()){
+                if(inst.getMobManager().getDogs().get(dog).equals(e.getEntity())){
+                    inst.getMobManager().getDogs().remove(dog);
+                    mob = dog;
+                }
+            }
+
+            if(e.getDamager() instanceof Player && mob != null){
+                inst.getPlayerManager().addMoney((Player) e.getDamager(), mob.getMoney());
+                inst.gameCycle.addKills((Player)e.getDamager());
+
+                ArmorStand armorStand = (ArmorStand) e.getEntity().getLocation().getWorld().spawnEntity(e.getEntity().getLocation(), EntityType.ARMOR_STAND);
+
+                armorStand.setCustomName("§e+" + mob.getMoney());
+                armorStand.setCustomNameVisible(false);
+                armorStand.setBasePlate(false);
+                armorStand.setGravity(false);
+                armorStand.setVisible(false);
+                armorStand.setSmall(true);
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        armorStand.remove();
+                        cancel();
+                    }
+                }.runTaskLater(inst, 10);
+            }
+        }
     }
 }

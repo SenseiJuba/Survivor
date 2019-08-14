@@ -1,5 +1,7 @@
 package fr.senseijuba.survivor;
 
+import fr.senseijuba.survivor.atouts.Atout;
+import fr.senseijuba.survivor.atouts.AtoutListener;
 import fr.senseijuba.survivor.commands.GetWeapon;
 import fr.senseijuba.survivor.commands.SurvivorCommand;
 import fr.senseijuba.survivor.cycle.AutoStart;
@@ -36,6 +38,7 @@ public class Survivor extends JavaPlugin {
 
     private static Survivor instance;
     private ListenerClass l;
+    private AtoutListener atoutListener;
     public int vague = 0;
     public Location bossSpawn;
     public Location lobbySpawn;
@@ -47,8 +50,11 @@ public class Survivor extends JavaPlugin {
     @Getter @Setter
     HashMap<Player, PlayerData> dataPlayers = new HashMap<>();
 
+    @Getter
+    HashMap<UUID, List<Atout>> playerAtout = new HashMap<>();
+
     private HashMap<World, GameManager> gameManagers;
-    private HashMap<String, ItemStack> atouts;
+    private HashMap<String, ItemStack> specialItems;
     private HashMap<Map, Integer> vote;
     private HashMap<Player, Map> playervote;
     private int voteAleatoire = 0;
@@ -73,6 +79,8 @@ public class Survivor extends JavaPlugin {
         registerNMSClasses();
         maps = new ArrayList<Map>();
         tips = new ArrayList<String>();
+
+        atoutListener = new AtoutListener();
 
         try {
             mariadb = new Mariadb();
@@ -370,12 +378,12 @@ public class Survivor extends JavaPlugin {
         this.currentMap = currentMap;
     }
 
-    public HashMap<String, ItemStack> getAtouts() {
-        return atouts;
+    public HashMap<String, ItemStack> getSpecialItem() {
+        return specialItems;
     }
 
-    public void addAtout(String name, ItemStack item) {
-        atouts.put(name, item);
+    public void addSpecialItem(String name, ItemStack item) {
+        specialItems.put(name, item);
     }
 
     public HashMap<Map, Integer> getVote() {

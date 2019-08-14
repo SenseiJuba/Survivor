@@ -9,6 +9,8 @@ import fr.senseijuba.survivor.mobs.Dog;
 import fr.senseijuba.survivor.utils.ScoreboardSign;
 import fr.senseijuba.survivor.utils.Title;
 import fr.senseijuba.survivor.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -23,12 +25,19 @@ public class GameCycle extends BukkitRunnable {
 
     Survivor inst;
     double timer = 0;
+    int count = 10;
     int spawned = 0;
     int tospawn = new Random(3).nextInt() + 6;
+    int zombies = 0;
+    @Getter HashMap<UUID, Integer> kills;
+    @Getter HashMap<UUID, Integer> deaths;
+    String mobname;
+    VagueState vagueState;
     HashMap<Player, ScoreboardSign> scoreboardSignHashMap;
 
     public GameCycle(Survivor instance) {
         this.inst = instance;
+        vagueState = VagueState.WAITING;
 
         for(Player player : Bukkit.getOnlinePlayers()){
             ScoreboardSign sb = new ScoreboardSign(player, "§cSurvivor");
@@ -161,17 +170,91 @@ public class GameCycle extends BukkitRunnable {
 
     @Deprecated
     @Override
-    public void run() {
+    public void run(){
 
-        if(timer == 2*60+30)
-            timer = 0;
+        //spawn
+        List<Location> spawnmob = new ArrayList<>();
 
+        if(timer == 0 && !vagueState.equals(VagueState.FINISH)){
+            vagueState = VagueState.WAITING;
+            initVagueDeathKills();
+        }
+
+        if(timer == 10){
+            vagueState = VagueState.SPAWNING;
+            for(Player player : Bukkit.getOnlinePlayers()){
+                player.sendMessage(vagueState.getMsg());
+                Title.sendTitle(player, 0, 20, 5, vagueState.getName(), "Nombre de monstres :" + tospawn);
+                Utils.playSound(player, player.getLocation(), Sound.ENDERDRAGON_GROWL, 3);
+            }
+        }
+
+        if(new Random(40).nextInt() == 0){
+            for(Player player : Bukkit.getOnlinePlayers()){
+                Utils.playSound(player, player.getLocation(), Sound.AMBIENCE_CAVE, 3);
+            }
+        }
 
         //start vague
-        if(timer == 0){
+        if(zombies == 0){
+
+            vagueState = VagueState.WAITING;
+            timer = 0;
+            inst.setVague(inst.getVague() + 1);
+
+            tospawn += new Random(2).nextInt();
+
+            zombies += tospawn;
+
+            Sound mobsound = Sound.CAT_HISS;
+
+            switch(inst.vague/10%10){
+                case(0):
+                    //TODO BOSS
+                    break;
+                case(5):
+                    mobname = "Dog";
+                    mobsound = Sound.WOLF_GROWL;
+                    break;
+                default:
+                    mobname = "Zombie";
+                    mobsound = Sound.ZOMBIE_IDLE;
+                    break;
+            }
+
             for(Player player : Bukkit.getOnlinePlayers()){
+                player.sendMessage(vagueState.getMsg());
                 Title.sendTitle(player, 0, 20, 5, "Vague " + inst.getVague(), "Nombre de monstres :" + tospawn);
-                Utils.playSound(player, player.getLocation(), Sound.ENTITY_ENDERDRAGON_DEATH, 3);
+                Utils.playSound(player, player.getLocation(), mobsound, 3);
+            }
+
+            //spawn
+            for(Zone zone : inst.getCurrentMap().getZones()){
+                if(zone.isActive){
+                    for(Location loc : zone.getSpawnMobZones()){
+                        spawnmob.add(loc);
+                    }
+                }
+            }
+        }
+
+        //vague over
+        if(zombies == 0){
+            vagueState = VagueState.FINISH;
+            count = 0;
+            updateStats();
+
+            for(Player player : Bukkit.getOnlinePlayers()){
+                player.sendMessage("§f┼──────§b──────§3────────────§b──────§f──────┼"
+                        + "\n"
+                        + "   §7» §l§3Survivor : Vague terminée\n"
+                        + "\n"
+                        + "   §7■ §f§lStats: \n"
+                        + "        §7● §fKills: §6" + kills.get(player.getUniqueId()) + "\n"
+                        + "        §7● §fMorts: §6" + deaths.get(player.getUniqueId()) + "\n"
+                        + "\n§f┼──────§b──────§3────────────§b──────§f──────┼");
+                Utils.playSound(player, player.getLocation(), Sound.ANVIL_LAND, 3);
+                Title.sendTitle(player, 0, 20, 5, "Vague terminée", "Bonus: ");
             }
         }
 
@@ -212,39 +295,28 @@ public class GameCycle extends BukkitRunnable {
 
             sb.setLine(i, "§4");
             i--;
-            sb.setLine(i, "§6Total kill: " + inst.getPlayerManager().getKills().get(player.getUniqueId()));
-            i--;
-            sb.setLine(i, "§6Total mort: " + inst.getPlayerManager().getDeaths().get(player.getUniqueId()));
-            i--;
+
+            if(vagueState.equals(VagueState.SPAWNING)) {
+                sb.setLine(i, "§6Zombies restants: " + inst.getPlayerManager().getKills().get(player.getUniqueId()));
+                i--;
+                sb.setLine(i, "§6Total kill: " + inst.getPlayerManager().getKills().get(player.getUniqueId()));
+                i--;
+            }
+            else if(vagueState.equals(VagueState.WAITING)){
+                sb.setLine(i, "§6» Préparation «");
+                i--;
+                sb.setLine(i, "§0");
+                i--;
+            }
+
             sb.setLine(i, "§8");
         }
 
+
         //spawn
-        List<Location> spawnmob = new ArrayList<>();
-
-        for(Zone zone : inst.getCurrentMap().getZones()){
-            if(zone.isActive){
-                for(Location loc : zone.getSpawnMobZones()){
-                    spawnmob.add(loc);
-                }
-            }
-        }
-
-        if(new Random(3).nextInt() == 1 && spawned<tospawn){
+        if(new Random(3).nextInt() == 1 && spawned<tospawn && vagueState.equals(VagueState.SPAWNING)){
 
             String mobname = null;
-
-            switch(inst.vague/10%10){
-                case(0):
-                    //TODO BOSS
-                    break;
-                case(5):
-                    mobname = "Dog";
-                    break;
-                default:
-                    mobname = "Zombie";
-                    break;
-            }
 
             for(AbstractMob mob : inst.getMobManager().listMobs()){
                 if(mob.getEntity().getName().equals(mobname)){
@@ -254,7 +326,10 @@ public class GameCycle extends BukkitRunnable {
             }
         }
 
-        timer++;
+        if(count<5)
+            count++;
+        else
+            timer++;
     }
 
     public String getTimer(double timer){
@@ -276,5 +351,58 @@ public class GameCycle extends BukkitRunnable {
             chrono = chrono + sec;
 
         return chrono;
+    }
+
+    public enum VagueState{
+
+        WAITING("La préparation",
+                "§f┼──────§a──────§2────────────§a──────§f──────┼"
+                        + "\n"
+                        + "   §7» §l§2Survivor : Préparation\n"
+                        + "\n"
+                        + "   §7■ §f§lPhase de Préparation : §r§fVous avez 10 secondes \n"
+                        + "   §7■ §fPour vous préparer à la prochaine vague.\n"
+                        + "   §7■ §fBonne chance ! \n"
+                        + "\n§f┼──────§a──────§2────────────§a──────§f──────┼"),
+        SPAWNING("L'attaque",
+                "§f┼──────§c──────§4────────────§c──────§f──────┼"
+                        + "\n"
+                        + "   §7» §l§4Survivor : Attaque\n"
+                        + "\n"
+                        + "   §7■ §f§lPhase d'attaque : §r§fUn certain nombre de zombies \n"
+                        + "   §7■ §fvous attaque, survivez et tuez les tous.\n"
+                        + "   §7■ §fBonne chance ! \n"
+                        + "\n§f┼──────§c──────§4────────────§c──────§f──────┼"),
+
+        FINISH("Fin", "");
+
+        @Getter private final String name;
+        @Getter private final String msg;
+
+        VagueState(String name, String msg){
+            this.name = name;
+            this.msg = msg;
+        }
+    }
+
+    public void addKills(Player player){
+        this.kills.put(player.getUniqueId(), this.kills.get(player.getUniqueId()) + 1);
+    }
+
+    public void addDeaths(Player player){
+        this.deaths.put(player.getUniqueId(), this.deaths.get(player.getUniqueId()) + 1);
+    }
+
+    public void initVagueDeathKills(){
+        for(Player player : Bukkit.getOnlinePlayers()){
+            kills.put(player.getUniqueId(), 0);
+            deaths.put(player.getUniqueId(), 0);
+        }
+    }
+
+    public void updateStats(){
+        for(UUID uuid : kills.keySet()){
+            inst.getPlayerManager().addKills(uuid, count);
+        }
     }
 }
