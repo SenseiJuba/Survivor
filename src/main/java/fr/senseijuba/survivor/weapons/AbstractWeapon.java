@@ -20,7 +20,7 @@ public abstract class AbstractWeapon extends Something
 		super(name, mat, munitions, maxMunitions, ratioTir, enchanted, sound, amplifier, lore);
 		this.timeCharging = timeCharging;
 		
-		if(ratioTir < 3 && !(this instanceof MitrailletteLourde) && !(this instanceof LaTornade))
+		if(ratioTir < 3)
 			this.ratioTir = 3;
 	}
 	
@@ -54,7 +54,7 @@ public abstract class AbstractWeapon extends Something
 		return maxMunitions;
 	}
 
-	pubic int getMunitions() { return munitions; }
+	public int getMunitions() { return munitions; }
 	
 	public double getTimeCharging()
 	{

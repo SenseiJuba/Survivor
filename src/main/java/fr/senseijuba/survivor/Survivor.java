@@ -9,16 +9,14 @@ import fr.senseijuba.survivor.cycle.GameCycle;
 import fr.senseijuba.survivor.database.Mariadb;
 import fr.senseijuba.survivor.database.player.PlayerData;
 import fr.senseijuba.survivor.database.player.PlayerDataManager;
-import fr.senseijuba.survivor.managers.BarricadeManager;
-import fr.senseijuba.survivor.managers.GameManager;
-import fr.senseijuba.survivor.managers.GameState;
-import fr.senseijuba.survivor.managers.PlayerManager;
+import fr.senseijuba.survivor.managers.*;
 import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.map.VoteMapManager;
 import fr.senseijuba.survivor.mobs.MobManager;
 import fr.senseijuba.survivor.utils.NMSUtils;
 import fr.senseijuba.survivor.utils.Title;
 import fr.senseijuba.survivor.utils.config.ConfigEntries;
+import fr.senseijuba.survivor.weapons.AbstractWeapon;
 import fr.senseijuba.survivor.weapons.WeaponManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,8 +35,9 @@ import java.util.*;
 public class Survivor extends JavaPlugin {
 
     private static Survivor instance;
-    private ListenerClass l;
+    @Getter private ListenerClass l;
     private AtoutListener atoutListener;
+    private SignManager signManager;
     public int vague = 0;
     public Location bossSpawn;
     public Location lobbySpawn;
@@ -52,6 +51,8 @@ public class Survivor extends JavaPlugin {
 
     @Getter
     HashMap<UUID, List<Atout>> playerAtout = new HashMap<>();
+    @Getter
+    HashMap<UUID, List<AbstractWeapon>> playerWeapon = new HashMap<>();
 
     private HashMap<World, GameManager> gameManagers;
     private HashMap<String, ItemStack> specialItems;
@@ -81,6 +82,7 @@ public class Survivor extends JavaPlugin {
         tips = new ArrayList<String>();
 
         atoutListener = new AtoutListener();
+        signManager = new SignManager(instance);
 
         try {
             mariadb = new Mariadb();

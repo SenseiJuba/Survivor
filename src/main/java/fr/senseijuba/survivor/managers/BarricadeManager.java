@@ -68,7 +68,7 @@ public class BarricadeManager implements Listener {
                         {
                             finish = true;
 
-                            if(p.isSneaking() || !barricade.isNearTo(p.getLocation())){
+                            if(!p.isSneaking() || !barricade.isNearTo(p.getLocation())){
                                 cancel();
                             }
 

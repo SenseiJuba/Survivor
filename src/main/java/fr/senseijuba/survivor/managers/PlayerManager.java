@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.commands.SurvivorCommand;
+import fr.senseijuba.survivor.utils.DeadBodies;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -45,8 +46,11 @@ public class PlayerManager
 	private HashMap<UUID, Boolean> hasThreeWeapons;
 	private HashMap<UUID, Boolean> hasQuickRevive;
 	private HashMap<UUID, Boolean> hasGrave;
+    private HashMap<UUID, Boolean> isDead;
+    private HashMap<UUID, Boolean> isRevived;
+	private HashMap<UUID, Boolean> isScope;
 	private HashMap<UUID, Integer> money;
-	private HashMap<UUID, HashMap<Location, ArmorStand>> deadbody;
+	@Getter private HashMap<UUID, DeadBodies> deadbodies;
 	@Getter private HashMap<UUID, Integer> kills;
 	@Getter private HashMap<UUID, Integer> deaths;
 	private HashMap<UUID, FireCause> fireCause;
@@ -245,9 +249,76 @@ public class PlayerManager
 		hasGrave.replace(p.getUniqueId(), k);
 	}
 
+    public boolean isDead(Player p)
+    {
+        if(isDead.get(p.getUniqueId()) == null)
+        {
+            isDead.put(p.getUniqueId(), false);
+            return false;
+        }
+
+        else
+            return isDead.get(p.getUniqueId());
+    }
+
+    public void setDead(Player p, boolean k)
+    {
+        if(isDead.get(p.getUniqueId()) == null)
+        {
+            isDead.put(p.getUniqueId(), k);
+        }
+
+        isDead.replace(p.getUniqueId(), k);
+    }
+
+    public boolean isRevived(Player p)
+    {
+        if(isRevived.get(p.getUniqueId()) == null)
+        {
+            isRevived.put(p.getUniqueId(), false);
+            return false;
+        }
+
+        else
+            return isRevived.get(p.getUniqueId());
+    }
+
+    public void setRevived(Player p, boolean k)
+    {
+        if(isRevived.get(p.getUniqueId()) == null)
+        {
+            isRevived.put(p.getUniqueId(), k);
+        }
+
+        isRevived.replace(p.getUniqueId(), k);
+    }
+
+	public boolean isScope(Player p)
+	{
+		if(isScope.get(p.getUniqueId()) == null)
+		{
+			isScope.put(p.getUniqueId(), false);
+			return false;
+		}
+
+		else
+			return isScope.get(p.getUniqueId());
+	}
+
+	public void setScope(Player p, boolean k)
+	{
+		if(isScope.get(p.getUniqueId()) == null)
+		{
+			isScope.put(p.getUniqueId(), k);
+		}
+
+		isScope.replace(p.getUniqueId(), k);
+	}
 
 
-	public void resetGame(Player p)
+
+
+    public void resetGame(Player p)
 	{
 
 		hasDoubleCoup.remove(p.getUniqueId());
@@ -318,6 +389,10 @@ public class PlayerManager
 
 	public void addMoney(Player player, int money){
 		this.money.replace(player.getUniqueId(), getMoney().get(player.getUniqueId()) + money);
+	}
+
+	public void removeMoney(Player player, int money){
+		this.money.replace(player.getUniqueId(), getMoney().get(player.getUniqueId()) - money);
 	}
 
 	public void setMoney(HashMap<UUID, Integer> money) {

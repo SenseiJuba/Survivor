@@ -38,7 +38,7 @@ public class PlayerManager
 	private HashMap<String, HashMap<Kit, HashMap<Class<? extends AbstractWeapon>, Integer>>> weaponsPlaces;
 	private List<TFPlayer> players;
 	private Player modifyZone1;
-	private Player modifyZone2;
+	private Player modifyZone2;z
 	private Player bigBlockPoser;
 	private Player smallBlockPoser;
 	private EulerAngle bigBlockAngle;

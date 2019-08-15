@@ -2,6 +2,8 @@ package fr.senseijuba.survivor.cycle;
 
 import com.mysql.jdbc.Util;
 import fr.senseijuba.survivor.Survivor;
+import fr.senseijuba.survivor.atouts.Atout;
+import fr.senseijuba.survivor.atouts.AtoutListener;
 import fr.senseijuba.survivor.managers.GameState;
 import fr.senseijuba.survivor.map.Zone;
 import fr.senseijuba.survivor.mobs.AbstractMob;
@@ -9,6 +11,7 @@ import fr.senseijuba.survivor.mobs.Dog;
 import fr.senseijuba.survivor.utils.ScoreboardSign;
 import fr.senseijuba.survivor.utils.Title;
 import fr.senseijuba.survivor.utils.Utils;
+import fr.senseijuba.survivor.weapons.AbstractWeapon;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -243,6 +246,33 @@ public class GameCycle extends BukkitRunnable {
             vagueState = VagueState.FINISH;
             count = 0;
             updateStats();
+
+            for(Player player : Bukkit.getOnlinePlayers()){
+                if(inst.getPlayerManager().isDead(player)){
+                    if(!inst.getPlayerManager().hasGrave(player)){
+                        inst.getPlayerManager().getDeadbodies().get(player).destroyDeadBodies(player);
+                        inst.getPlayerWeapon().get(player).clear();
+
+                        for(AbstractWeapon weapon : inst.getWeaponManager().listWeapons()){
+                            if(weapon.getName().equals("M1911"))
+                                inst.getPlayerWeapon().put(player.getUniqueId(), Arrays.asList(weapon));
+                            player.getInventory().addItem(weapon.getItem(1));
+                        }
+                    }
+                    else{
+                        inst.getPlayerManager().setGrave(player, false);
+                        inst.getPlayerAtout().get(player).remove(Atout.GRAVE);
+                    }
+
+                    player.teleport(inst.getCurrentMap().getSpawnpoint());
+                    player.setHealth(player.getMaxHealth());
+                    player.getInventory().clear();
+
+                    AtoutListener.updateAtout(player);
+
+                }
+            }
+
 
             for(Player player : Bukkit.getOnlinePlayers()){
                 player.sendMessage("§f┼──────§b──────§3────────────§b──────§f──────┼"

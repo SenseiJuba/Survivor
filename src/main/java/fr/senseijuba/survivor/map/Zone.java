@@ -1,13 +1,15 @@
 package fr.senseijuba.survivor.map;
 
+import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.utils.Cuboid;
+import fr.senseijuba.survivor.utils.Title;
 import fr.senseijuba.survivor.utils.Utils;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 
@@ -337,5 +339,36 @@ public class Zone {
             return barri;
         }
         return null;
+    }
+
+    public void openZone(Player opener){
+        isActive = true;
+
+        for(Player pls : Bukkit.getOnlinePlayers()){
+            Title.sendTitle(pls, 2, 20, 2, "§eZone §6" + getName() + " §eest ouverte", "§epar " + opener.getName());
+            Utils.playSound(pls, getDoor().midpoint(), Sound.LEVEL_UP, 100);
+        }
+
+        new BukkitRunnable(){
+
+            List<Block> blockList = getDoor().blocksInside();
+            int i = 0;
+
+            @Override
+            public void run() {
+
+                if(blockList.get(i) == null){
+                    return;
+                }
+
+                blockList.get(i).setType(Material.AIR);
+                for(Player pls : Bukkit.getOnlinePlayers()) {
+                    Utils.playSound(pls, getDoor().midpoint(), Sound.ITEM_BREAK, 5);
+                }
+
+                i++;
+            }
+        }.runTaskTimer(Survivor.getInstance(), 10, 5);
+
     }
 }

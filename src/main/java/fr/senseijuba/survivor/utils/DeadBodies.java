@@ -2,6 +2,7 @@ package fr.senseijuba.survivor.utils;
 
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
+import lombok.Getter;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -11,7 +12,9 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class DeadBodies {
 
@@ -25,6 +28,9 @@ public class DeadBodies {
         playFakeBed(p, pos);
     }
 
+    @Getter
+    HashMap<UUID, Integer> playerId = new HashMap<>();
+    HashMap<UUID, Location> corpsLoc = new HashMap<>();
     int entityId = 0;
 
     @SuppressWarnings("deprecation")
@@ -38,6 +44,9 @@ public class DeadBodies {
 
         DataWatcher dw = clonePlayerDatawatcher(p, entityId);
         dw.watch(10, p1.getHandle().getDataWatcher().getByte(10));
+
+        playerId.put(p.getUniqueId(), entityId);
+        corpsLoc.put(p.getUniqueId(), p.getLocation());
 
         GameProfile prof = new GameProfile(p1.getUniqueId(), p1.getName());
 
@@ -158,5 +167,40 @@ public class DeadBodies {
 
         field.set(instance, value);
 
+    }
+
+    public void destroyDeadBodies(Player deadbodie){
+        PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy();
+
+        int id = playerId.get(deadbodie.getUniqueId());
+
+        try {
+            setValue(destroy, "a", id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        for(Player player : Bukkit.getOnlinePlayers()){
+            CraftPlayer pl = ((CraftPlayer) player);
+
+            pl.getHandle().playerConnection.sendPacket(destroy);
+
+        }
+
+        corpsLoc.remove(deadbodie.getUniqueId());
+        playerId.remove(deadbodie.getUniqueId());
+    }
+
+    public UUID nearDeadCorps(Location loc){
+
+        UUID playerUUID = null;
+
+        for(UUID uuid: corpsLoc.keySet()){
+            Location loc2 = corpsLoc.get(uuid);
+            playerUUID = (loc.getX() > loc2.getX()-1 && loc.getX() < loc2.getX()+1 && loc.getY() > loc2.getY()-1 && loc.getY() < loc2.getY()+1 && loc.getZ() > loc2.getZ()-1 && loc.getZ() < loc2.getZ()+1) ? uuid : null;
+
+        }
+
+        return playerUUID;
     }
 }

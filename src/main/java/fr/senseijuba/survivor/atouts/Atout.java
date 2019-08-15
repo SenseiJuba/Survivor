@@ -70,7 +70,7 @@ public enum Atout {
             if(Survivor.getInstance().getPlayerAtout().get(p.getUniqueId()).contains(k)){
                 enchant = true;
             }
-            inv.setItem(8+k.getPlaceInInventory(), k.getRepItem(p));
+            inv.setItem(8+k.getPlaceInInventory(), k.getRepItem(p, enchant));
         }
 
         ItemStack tips;

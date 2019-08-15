@@ -37,6 +37,7 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
         registerCommand(new StartCommand());
         registerCommand(new TipsCommand());
         registerCommand(new ZoneCommand());
+        registerCommand(new WeaponBuyCommand());
     }
 
     public void registerCommand(SurvivorArgCommand command)
@@ -366,7 +367,7 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
                 Survivor.getInstance().saveTheConfig(Survivor.getInstance().getConfig());
 
             else if(!configDebug)
-                Survivor.getInstance().getWhatsInConfig();
+                Survivor.getInstance().reloadConfig();
 
             return true;
         }

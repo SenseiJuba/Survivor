@@ -1,7 +1,9 @@
 package fr.senseijuba.survivor;
 
+import fr.senseijuba.survivor.atouts.Atout;
 import fr.senseijuba.survivor.commands.GetWeapon;
 import fr.senseijuba.survivor.commands.SurvivorCommand;
+import fr.senseijuba.survivor.cycle.GameCycle;
 import fr.senseijuba.survivor.database.Mariadb;
 import fr.senseijuba.survivor.database.player.PlayerData;
 import fr.senseijuba.survivor.database.player.PlayerDataManager;
@@ -9,35 +11,49 @@ import fr.senseijuba.survivor.managers.GameState;
 import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.map.Zone;
 import fr.senseijuba.survivor.mobs.Dog;
-import fr.senseijuba.survivor.utils.Cuboid;
-import fr.senseijuba.survivor.utils.ScoreboardSign;
-import fr.senseijuba.survivor.utils.Title;
-import fr.senseijuba.survivor.utils.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import fr.senseijuba.survivor.utils.*;
+import fr.senseijuba.survivor.weapons.AbstractWeapon;
+import fr.senseijuba.survivor.weapons.Something;
+import fr.senseijuba.survivor.weapons.WeaponManager;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.*;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.UUID;
 
 public class ListenerClass implements Listener {
 
     Survivor inst = Survivor.getInstance();
     PlayerDataManager dataManager = inst.dataManager;
     Mariadb db = inst.mariadb;
+    public HashMap<UUID, Long> rClickingPlayersLast;
+    public HashMap<UUID, BukkitRunnable> rClickingPlayersTask;
+    public HashMap<UUID, Long> timeLastClick;
+    public HashMap<UUID, Integer> rClickingPlayersTaskId;
 
     public ListenerClass() throws ClassNotFoundException {
+        rClickingPlayersLast = new HashMap<>();
+        rClickingPlayersTask = new HashMap<>();
+        timeLastClick = new HashMap<>();
+        rClickingPlayersTaskId = new HashMap<>();
     }
 
     @EventHandler
@@ -202,12 +218,14 @@ public class ListenerClass implements Listener {
     {
         if(!Survivor.getInstance().getMaps().contains(Survivor.getInstance().worldtoMap(e.getPlayer().getWorld())))
             return;
+        else{
+            e.getPlayer().sendMessage("§cN'oubliez pas, vous ne pouvez pas construire sur une map enable, faites §6/survivor maps unregister §cpour pouvoir la modifier ");
+            e.setCancelled(true);
+        }
 
         Player p = e.getPlayer();
         Block b = e.getBlockPlaced();
         Map m = Survivor.getInstance().worldtoMap(p.getWorld());
-
-
 
         if(b.getType().equals(Material.BARRIER) && m.getZoneModifyingBarricade(p) != null) {
             if (m.getZoneModifyingBarricade(p).getModifyBarricade2().equals(p)) {
@@ -233,25 +251,17 @@ public class ListenerClass implements Listener {
             e.setCancelled(true);
             return;
         }
-        else if(b.getType().equals(Material.SIGN) && m.getZoneModifyingSign(p) != null){
+        else if(b.getType().equals(Material.SIGN) && m.getZoneModifyingSign(p) != null && e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase("§6Création d'un panneau d'achat")){
 
             Zone zone = m.getZoneModifyingSign(p);
             zone.setSignModifier(null);
             zone.setBuyingSign(b.getLocation());
 
             Sign l = (Sign) b;
-            l.setLine(1, "§4<Zone" + zone.getName() + ">");
-            l.setLine(2, "§4" + zone.getCost() + "$");
+            l.setLine(1, "§4<Zone " + zone.getName() + " >");
+            l.setLine(2, "§4 " + zone.getCost() + " $");
 
             p.sendMessage("§aPanneau de la zone " + zone.getName() + " créé, le coût est : " + zone.getCost() + "$");
-        }
-
-        if(!Survivor.getInstance().getMaps().contains(m)){
-            return;
-        }
-        else{
-            p.sendMessage("§cN'oubliez pas, vous ne pouvez pas construire sur une map enable, faites §6/survivor maps unregister §cpour pouvoir la modifier ");
-            e.setCancelled(true);
         }
     }
 
@@ -338,80 +348,310 @@ public class ListenerClass implements Listener {
         p.getInventory().removeItem(itemDrop);
     }
 
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+
+        Entity victim = event.getEntity();
+
+        if(inst.getGameState().equals(GameState.STARTED)) {
+
+            if(victim instanceof Player) {
+
+                Player player = (Player) victim;
+                if(player.getHealth() <= event.getDamage()) {
+                    killPlayer(player);
+                    event.setDamage(0);
+                }
+            }
+        }
+        else {
+            event.setCancelled(true);
+            return;
+        }
+    }
+
     public void onDeath(EntityDamageByEntityEvent e){
-        if(e.getEntity() instanceof Player){
-            if(!(e.getDamager() instanceof Player)){
 
-            }
-            else{
-                e.setCancelled(true);
-            }
-        }
-        else if(e.getEntity() instanceof Zombie){
+        if(inst.getGameState().equals(GameState.STARTED)) {
+            if (e.getEntity() instanceof Player) {
+                if (((Player) e.getEntity()).getHealth() - e.getDamage() <= 0) {
+                    if (!(e.getDamager() instanceof Player)) {
 
-            fr.senseijuba.survivor.mobs.Zombie mob = null;
+                        Player player = (Player) e.getEntity();
+                        killPlayer(player);
+                        e.setDamage(0);
 
-            for(fr.senseijuba.survivor.mobs.Zombie zombie : inst.getMobManager().getZombies().keySet()){
-                if(inst.getMobManager().getZombies().get(zombie).equals(e.getEntity())){
-                    inst.getMobManager().getZombies().remove(zombie);
-                    mob = zombie;
+
+                    } else {
+                        e.setCancelled(true);
+                    }
+                }
+            } else if (e.getEntity() instanceof Zombie) {
+
+                if (((Zombie) e.getEntity()).getHealth() - e.getDamage() <= 0) {
+                    fr.senseijuba.survivor.mobs.Zombie mob = null;
+
+                    for (fr.senseijuba.survivor.mobs.Zombie zombie : inst.getMobManager().getZombies().keySet()) {
+                        if (inst.getMobManager().getZombies().get(zombie).equals(e.getEntity())) {
+                            inst.getMobManager().getZombies().remove(zombie);
+                            mob = zombie;
+                        }
+                    }
+
+                    if (e.getDamager() instanceof Player && mob != null) {
+                        inst.getPlayerManager().addMoney((Player) e.getDamager(), mob.getMoney());
+                        inst.gameCycle.addKills((Player) e.getDamager());
+
+                        ArmorStand armorStand = (ArmorStand) e.getEntity().getLocation().getWorld().spawnEntity(e.getEntity().getLocation(), EntityType.ARMOR_STAND);
+
+                        armorStand.setCustomName("§e+" + mob.getMoney());
+                        armorStand.setCustomNameVisible(false);
+                        armorStand.setBasePlate(false);
+                        armorStand.setGravity(false);
+                        armorStand.setVisible(false);
+                        armorStand.setSmall(true);
+
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                armorStand.remove();
+                                cancel();
+                            }
+                        }.runTaskLater(inst, 10);
+                    }
+                }
+            } else if (e.getEntity() instanceof Wolf) {
+
+                if (((Wolf) e.getEntity()).getHealth() - e.getDamage() <= 0) {
+                    Dog mob = null;
+
+                    for (Dog dog : inst.getMobManager().getDogs().keySet()) {
+                        if (inst.getMobManager().getDogs().get(dog).equals(e.getEntity())) {
+                            inst.getMobManager().getDogs().remove(dog);
+                            mob = dog;
+                        }
+                    }
+
+                    if (e.getDamager() instanceof Player && mob != null) {
+                        inst.getPlayerManager().addMoney((Player) e.getDamager(), mob.getMoney());
+                        inst.gameCycle.addKills((Player) e.getDamager());
+
+                        ArmorStand armorStand = (ArmorStand) e.getEntity().getLocation().getWorld().spawnEntity(e.getEntity().getLocation(), EntityType.ARMOR_STAND);
+
+                        armorStand.setCustomName("§e+" + mob.getMoney());
+                        armorStand.setCustomNameVisible(false);
+                        armorStand.setBasePlate(false);
+                        armorStand.setGravity(false);
+                        armorStand.setVisible(false);
+                        armorStand.setSmall(true);
+
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                armorStand.remove();
+                                cancel();
+                            }
+                        }.runTaskLater(inst, 10);
+                    }
                 }
             }
-
-            if(e.getDamager() instanceof Player && mob != null){
-                inst.getPlayerManager().addMoney((Player) e.getDamager(), mob.getMoney());
-                inst.gameCycle.addKills((Player)e.getDamager());
-
-                ArmorStand armorStand = (ArmorStand) e.getEntity().getLocation().getWorld().spawnEntity(e.getEntity().getLocation(), EntityType.ARMOR_STAND);
-
-                armorStand.setCustomName("§e+" + mob.getMoney());
-                armorStand.setCustomNameVisible(false);
-                armorStand.setBasePlate(false);
-                armorStand.setGravity(false);
-                armorStand.setVisible(false);
-                armorStand.setSmall(true);
-
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        armorStand.remove();
-                        cancel();
-                    }
-                }.runTaskLater(inst, 10);
-            }
         }
-        else if(e.getEntity() instanceof Wolf){
+        else{
+            e.setCancelled(true);
+            return;
+        }
+    }
 
-            Dog mob = null;
+    @EventHandler
+    public void onReloadOrShoot(PlayerInteractEvent e){
 
-            for(Dog dog : inst.getMobManager().getDogs().keySet()){
-                if(inst.getMobManager().getDogs().get(dog).equals(e.getEntity())){
-                    inst.getMobManager().getDogs().remove(dog);
-                    mob = dog;
-                }
+        if(e.getAction().equals(Action.RIGHT_CLICK_AIR) || e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            if (!Survivor.getInstance().gameState.equals(GameState.STARTED) || e.getPlayer().getGameMode().equals(GameMode.SPECTATOR))
+                return;
+
+            final UUID pid = e.getPlayer().getUniqueId();
+            rClickingPlayersLast.put(pid, System.currentTimeMillis());
+
+            long differenceTempsNonFinal = 300;
+
+            if (timeLastClick.get(pid) == null) {
+                timeLastClick.put(pid, System.currentTimeMillis());
+            } else if (System.currentTimeMillis() - timeLastClick.get(pid) > 600 || System.currentTimeMillis() - timeLastClick.get(pid) < 110) {
+                timeLastClick.replace(pid, System.currentTimeMillis());
+            } else {
+                differenceTempsNonFinal = System.currentTimeMillis() - timeLastClick.get(pid);
+                timeLastClick.replace(pid, System.currentTimeMillis());
             }
 
-            if(e.getDamager() instanceof Player && mob != null){
-                inst.getPlayerManager().addMoney((Player) e.getDamager(), mob.getMoney());
-                inst.gameCycle.addKills((Player)e.getDamager());
+            final long differenceTemps = differenceTempsNonFinal;
 
-                ArmorStand armorStand = (ArmorStand) e.getEntity().getLocation().getWorld().spawnEntity(e.getEntity().getLocation(), EntityType.ARMOR_STAND);
-
-                armorStand.setCustomName("§e+" + mob.getMoney());
-                armorStand.setCustomNameVisible(false);
-                armorStand.setBasePlate(false);
-                armorStand.setGravity(false);
-                armorStand.setVisible(false);
-                armorStand.setSmall(true);
-
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        armorStand.remove();
-                        cancel();
+            if (!rClickingPlayersTask.containsKey(pid) || rClickingPlayersTask.get(pid).getTaskId() > 0) {
+                if (e.getItem() != null && !e.getPlayer().getGameMode().equals(GameMode.SPECTATOR)) {
+                    for (Something s : Survivor.getInstance().getWeaponManager().listThings()) {
+                        if (s.getItem(1).isSimilar(e.getItem())) {
+                            WeaponManager.doEffectAndReload(e.getItem(), e.getPlayer(), pid, differenceTemps);
+                            e.setCancelled(true);
+                            break;
+                        }
                     }
-                }.runTaskLater(inst, 10);
+                }
             }
         }
     }
+
+    @EventHandler
+    public void onSwitchItem(PlayerItemHeldEvent e){
+
+        AbstractWeapon weapon = null;
+
+        if(inst.getPlayerManager().isScope(e.getPlayer())){
+            inst.getPlayerManager().setScope(e.getPlayer(), false);
+            e.getPlayer().getInventory().setHelmet(new ItemStack(inst.getPlayerAtout().get(e.getPlayer()).contains(Atout.MASTODONTE) ? Material.DIAMOND_HELMET : Material.IRON_HELMET));
+            e.getPlayer().removePotionEffect(PotionEffectType.SLOW);
+        }
+
+        if(e.getPlayer().getInventory().getItem(e.getNewSlot()).getItemMeta().getDisplayName().equalsIgnoreCase("Dragunov")) {
+            if (e.getPlayer().isSneaking()) {
+                inst.getPlayerManager().setScope(e.getPlayer(), true);
+                e.getPlayer().getInventory().setHelmet(new ItemStack(Material.PUMPKIN));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 5));
+            }
+        }
+
+        for(AbstractWeapon weapons : inst.getPlayerWeapon().get(e.getPlayer())){
+            if(weapons.getItem(1).isSimilar(e.getPlayer().getInventory().getItem(e.getNewSlot())))
+                weapon = weapons;
+        }
+
+        if(weapon != null){
+            Title.sendActionBar(e.getPlayer(), "§6§lArme: §r§e" + weapon.getName() + " §4| §6§lMunitions: §r§e" + weapon.getCurrentMunitions() + "/" + weapon.getCurrentMaxMunitions());
+        }
+    }
+
+    @EventHandler
+    public void onScope(PlayerToggleSneakEvent e){
+
+        if(e.getPlayer().getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase("Dragunov")){
+            if(e.getPlayer().isSneaking()){
+                inst.getPlayerManager().setScope(e.getPlayer(), true);
+                e.getPlayer().getInventory().setHelmet(new ItemStack(Material.PUMPKIN));
+                e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 5));
+            }
+            else if(inst.getPlayerManager().isScope(e.getPlayer())){
+                inst.getPlayerManager().setScope(e.getPlayer(), false);
+                e.getPlayer().getInventory().setHelmet(new ItemStack(inst.getPlayerAtout().get(e.getPlayer()).contains(Atout.MASTODONTE) ? Material.DIAMOND_HELMET : Material.IRON_HELMET));
+                e.getPlayer().removePotionEffect(PotionEffectType.SLOW);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onRevive(PlayerToggleSneakEvent e){
+        if(inst.gameState.equals(GameState.STARTED)) {
+            if (e.isSneaking()) {
+
+                Player pl = e.getPlayer();
+
+                for(Player player : Bukkit.getOnlinePlayers()) {
+
+                    UUID uuid = inst.getPlayerManager().getDeadbodies().get(player.getUniqueId()).nearDeadCorps(e.getPlayer().getLocation());
+
+                    if(uuid != null){
+                        if(pl.getUniqueId().equals(uuid)){
+                            if(!pl.getGameMode().equals(GameMode.SPECTATOR)){
+                                for(AbstractWeapon weapon : inst.getPlayerWeapon().get(pl.getUniqueId())){
+                                    pl.getInventory().addItem(weapon.getItem(1));
+                                    inst.getPlayerManager().getDeadbodies().get(uuid).destroyDeadBodies(player);
+                                }
+                            }
+                        }
+                        else if(!inst.getPlayerManager().isRevived(pl)){
+
+                            inst.getPlayerManager().setRevived(pl, true);
+
+                            ArmorStand armorStand = (ArmorStand) pl.getWorld().spawnEntity(pl.getLocation(), EntityType.ARMOR_STAND);
+                            armorStand.setCustomNameVisible(false);
+                            armorStand.setBasePlate(false);
+                            armorStand.setGravity(false);
+                            armorStand.setVisible(false);
+                            armorStand.setSmall(true);
+
+                            new BukkitRunnable()
+                            {
+                                Player p = e.getPlayer();
+                                boolean finish = false;
+                                Location loc = p.getLocation();
+
+                                int timer = 0;
+                                int maxtime = inst.getPlayerManager().hasQuickRevive(p) ? 1 : 5;
+
+                                @Override
+                                public void run()//SAVES
+                                {
+                                    finish = true;
+                                    armorStand.setCustomName(Utils.percentToBar(timer, maxtime));
+
+
+                                    if(!p.isSneaking() || inst.getPlayerManager().getDeadbodies().get(player.getUniqueId()).nearDeadCorps(e.getPlayer().getLocation()) == null){
+                                        inst.getPlayerManager().setRevived(pl, false);
+                                        cancel();
+                                    }
+
+                                    Utils.playSound(loc, Sound.ENDERDRAGON_WINGS, 3);
+
+                                    if(timer < maxtime){
+                                        timer++;
+                                        finish = false;
+                                    }
+
+                                    if(finish){
+                                        for(Player player : Bukkit.getOnlinePlayers()){
+                                            if(player.getUniqueId().equals(uuid)) {
+                                                inst.getPlayerManager().getDeadbodies().get(uuid).destroyDeadBodies(player);
+                                                player.setGameMode(GameMode.SURVIVAL);
+                                                player.setHealth(player.getMaxHealth());
+                                                player.teleport(loc);
+                                            }
+                                        }
+                                        inst.getPlayerManager().setRevived(pl, false);
+                                        cancel();
+                                    }
+                                }
+                            }.runTaskTimer((Plugin) inst, 20, 20);
+
+                        }
+
+                    }
+                }
+
+            }
+        }
+    }
+
+    public void killPlayer(Player p){
+
+        try {
+            DeadBodies deadBodies = new DeadBodies(p);
+            inst.getPlayerManager().getDeadbodies().put(p.getUniqueId(), deadBodies);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        for(Player player : Bukkit.getOnlinePlayers()){
+            player.sendMessage("§f┼──────§c──────§4────────────§c──────§f──────┼"
+                    + "\n"
+                    + "   §7» §l§3Survivor : Décès\n"
+                    + "   §7■ §fUn allié est mort en : " + Utils.locDirToString(p.getLocation()) + "\n"
+                    + "   §7■ §fAccroupissez vous à ses cotés pour le réanimer\n"
+                    + "\n§f┼──────§c──────§4────────────§c──────§f──────┼");
+            Utils.playSound(player, player.getLocation(), Sound.BLAZE_DEATH, 3);
+        }
+
+        inst.getPlayerManager().addDeaths(p.getUniqueId(), 1);
+        Title.sendTitle(p, 0, 20, 5, "§4☠ Vous êtes mort☠", "§cAttendez qu'on vienne vous réanimer");
+        p.setHealth(1);
+        p.setGameMode(GameMode.SPECTATOR);
+    }
+
+
 }

@@ -124,7 +124,7 @@ public class AtoutListener implements Listener {
     }
 
     public Inventory getPlayerAtoutInv(Player player){
-        Inventory inv = Bukkit.createInventory(null, 9*3, "Choisir une place");
+        Inventory inv = Bukkit.createInventory(null, 9*3, "§eChoisir une place d'atout");
 
         ItemStack barrer = new ItemBuilder(Material.BARRIER)
                 .name("Aucun atout")
@@ -148,7 +148,7 @@ public class AtoutListener implements Listener {
         switch (i){
             case(0):
                 for(int t : places){
-                    inv.setItem(places.get(i), barrer);
+                    inv.setItem(places.get(t), barrer);
                 }
                 break;
             case(1):
@@ -163,7 +163,9 @@ public class AtoutListener implements Listener {
         return inv;
     }
 
-    public void updateAtout(Player player){
+    public static void updateAtout(Player player){
+
+        Survivor inst = Survivor.getInstance();
 
         for(ItemStack armor : player.getInventory().getArmorContents()){
             armor.setType(null);

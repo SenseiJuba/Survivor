@@ -113,7 +113,7 @@ public class ZoneCommand extends SurvivorArgCommand {
 
                                     List<String> lore = new ArrayList<>();
                                     lore.add("§2Pour créer un panneau de zone :");
-                                    lore.add("§b-placer le à l'endroit voulu");
+                                    lore.add("§b-placez le à l'endroit voulu");
                                     meta.setLore(lore);
                                     meta.addEnchant(Enchantment.SILK_TOUCH, 2, false);
                                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -125,7 +125,7 @@ public class ZoneCommand extends SurvivorArgCommand {
                                     zone.setCost(Integer.parseInt(args[2]));
                                     zone.setSignModifier(p);
 
-                                    p.sendMessage("§aPlacer le panneau à l'endroit voulu pour créer un panneau d'achat");
+                                    p.sendMessage("§aPlacez le panneau à l'endroit voulu pour créer un panneau d'achat");
                                 } catch (Exception e) {
                                     p.sendMessage("§6" + args[2] + "§c n'est pas un chiffre/nombre");
                                 }
