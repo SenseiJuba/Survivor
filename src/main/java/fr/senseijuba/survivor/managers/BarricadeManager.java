@@ -17,7 +17,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class BarricadeManager implements Listener {
@@ -47,7 +46,7 @@ public class BarricadeManager implements Listener {
                     }
                 }
             }
-        }.runTaskTimer((Plugin) inst, 20, 20);
+        }.runTaskTimer(inst, 20, 20);
     }
 
     @EventHandler
@@ -78,6 +77,7 @@ public class BarricadeManager implements Listener {
                                 if(block.getType().equals(Material.AIR)){
                                     block.setType(Material.WOOD_STEP);
                                     finish = false;
+                                    inst.getDataPlayers().get(p).addXp(10);
                                     continue;
                                 }
                             }
@@ -86,7 +86,7 @@ public class BarricadeManager implements Listener {
                                 cancel();
                             }
                         }
-                    }.runTaskTimer((Plugin) inst, 20, 20);
+                    }.runTaskTimer(inst, 20, 20);
                 }
             }
         }

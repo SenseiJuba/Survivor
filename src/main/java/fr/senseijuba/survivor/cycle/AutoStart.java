@@ -10,6 +10,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -50,7 +51,7 @@ public class AutoStart extends BukkitRunnable {
             case 5:
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     Title.sendTitle(player, 0, 15, 5, "§c❺", "until start");
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 3.0f, 0.5f);
+                    player.playSound(player.getLocation(), Sound.NOTE_PLING, 3.0f, 0.5f);
                 }
                 break;
 
@@ -63,14 +64,14 @@ public class AutoStart extends BukkitRunnable {
             case 3:
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     Title.sendTitle(player, 0, 15, 5, "§6❸", "until start");
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 3.0f, 1f);
+                    player.playSound(player.getLocation(), Sound.NOTE_PLING, 3.0f, 1f);
                 }
                 break;
 
             case 2:
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     Title.sendTitle(player, 0, 15, 5, "§e❷", "until start");
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 3.0f, 1f);
+                    player.playSound(player.getLocation(), Sound.NOTE_PLING, 3.0f, 1f);
                 }
 
                 break;
@@ -78,7 +79,7 @@ public class AutoStart extends BukkitRunnable {
             case 1:
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     Title.sendTitle(player, 0, 15, 5, "§2❶", "until start");
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 3.0f, 1f);
+                    player.playSound(player.getLocation(), Sound.NOTE_PLING, 3.0f, 1f);
                 }
                 break;
             case 0:
@@ -110,6 +111,12 @@ public class AutoStart extends BukkitRunnable {
                 }
 
                 inst.setCurrentMap(mapvoted);
+
+                try {
+                    Utils.saveWorld(mapvoted.getW());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 for(Player player : Bukkit.getOnlinePlayers())
                     player.teleport(mapvoted.getSpawnpoint());

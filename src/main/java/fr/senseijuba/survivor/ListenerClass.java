@@ -1,9 +1,6 @@
 package fr.senseijuba.survivor;
 
 import fr.senseijuba.survivor.atouts.Atout;
-import fr.senseijuba.survivor.commands.GetWeapon;
-import fr.senseijuba.survivor.commands.SurvivorCommand;
-import fr.senseijuba.survivor.cycle.GameCycle;
 import fr.senseijuba.survivor.database.Mariadb;
 import fr.senseijuba.survivor.database.player.PlayerData;
 import fr.senseijuba.survivor.database.player.PlayerDataManager;
@@ -19,24 +16,20 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.*;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.UUID;
 
 public class ListenerClass implements Listener {
@@ -400,6 +393,7 @@ public class ListenerClass implements Listener {
 
                     if (e.getDamager() instanceof Player && mob != null) {
                         inst.getPlayerManager().addMoney((Player) e.getDamager(), mob.getMoney());
+                        inst.getDataPlayers().get(e.getDamager()).addXp(1);
                         inst.gameCycle.addKills((Player) e.getDamager());
 
                         ArmorStand armorStand = (ArmorStand) e.getEntity().getLocation().getWorld().spawnEntity(e.getEntity().getLocation(), EntityType.ARMOR_STAND);
@@ -434,6 +428,7 @@ public class ListenerClass implements Listener {
 
                     if (e.getDamager() instanceof Player && mob != null) {
                         inst.getPlayerManager().addMoney((Player) e.getDamager(), mob.getMoney());
+                        inst.getDataPlayers().get(e.getDamager()).addXp(2);
                         inst.gameCycle.addKills((Player) e.getDamager());
 
                         ArmorStand armorStand = (ArmorStand) e.getEntity().getLocation().getWorld().spawnEntity(e.getEntity().getLocation(), EntityType.ARMOR_STAND);
@@ -459,6 +454,94 @@ public class ListenerClass implements Listener {
         else{
             e.setCancelled(true);
             return;
+        }
+    }
+
+    @EventHandler
+    public void onInteractWitchArmorstand(PlayerInteractAtEntityEvent e) {
+        if (e.getRightClicked() instanceof ArmorStand) {
+
+            boolean ok = false;
+
+            switch (e.getRightClicked().getCustomName()) {
+                case ("§2La nuke"):
+                    for (Entity ent : e.getRightClicked().getLocation().getWorld().getEntities()) {
+                        if (ent instanceof Zombie) {
+                            ent.remove();
+                            Utils.playSound(ent.getLocation(), Sound.EXPLODE, 10);
+                            Utils.explosionParticles(ent.getLocation(), 2f, 10, Effect.SMOKE, Effect.FLAME, Effect.EXPLOSION_HUGE);
+                        } else if (ent instanceof Wolf) {
+                            ent.remove();
+                            Utils.playSound(ent.getLocation(), Sound.EXPLODE, 10);
+                            Utils.explosionParticles(ent.getLocation(), 2f, 10, Effect.SMOKE, Effect.FLAME, Effect.EXPLOSION_HUGE);
+                        } else if (ent instanceof Player) {
+                            inst.getPlayerManager().addMoney((Player) ent, 400);
+                            Title.sendTitle((Player) ent, 0, 20, 5, e.getRightClicked().getCustomName(), "§factivé par " + e.getPlayer());
+                        }
+                    }
+
+                    ok = true;
+                    e.getRightClicked().remove();
+                    break;
+                case ("§2Munition max"):
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        for (AbstractWeapon weapon : inst.getPlayerWeapon().get(player)) {
+                            weapon.setCurrentMaxMunitions(weapon.getMaxMunitions());
+                            weapon.setCurrentMunitions(weapon.getMaxMunitions());
+                        }
+                        Utils.playSound(player, player.getLocation(), Sound.ZOMBIE_METAL, 2);
+                        Title.sendTitle(player, 0, 20, 5, e.getRightClicked().getCustomName(), "§factivé par " + e.getPlayer());
+                    }
+
+                    ok = true;
+                    e.getRightClicked().remove();
+                    break;
+                case ("§2Charpentier"):
+                    for (Zone zone : inst.getCurrentMap().getZones()) {
+                        for (Cuboid barricade : zone.getBarricades()) {
+                            for (Block block : barricade.blocksInside()) {
+                                block.setType(Material.WOOD_STEP);
+                            }
+                            for (Player player : Bukkit.getOnlinePlayers()) {
+                                Utils.playSound(player, barricade.midpoint(), Sound.DIG_WOOD, 5);
+                            }
+                        }
+                    }
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        Title.sendTitle(player, 0, 20, 5, e.getRightClicked().getCustomName(), "§factivé par " + e.getPlayer());
+                    }
+
+                    ok = true;
+                    e.getRightClicked().remove();
+                    break;
+                case ("§2Boite à 10"):
+                    //TODO Boite magique
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        Title.sendTitle(player, 0, 20, 5, e.getRightClicked().getCustomName(), "§factivé par " + e.getPlayer());
+                    }
+
+                    ok = true;
+                    e.getRightClicked().remove();
+                    break;
+                case ("§2Mort instantanée"):
+                    for (Entity ent : e.getRightClicked().getLocation().getWorld().getEntities()) {
+                        if (ent instanceof Zombie) {
+                            ((Zombie) ent).setHealth(0.5);
+                            Utils.explosionParticles(ent.getLocation(), 1, 2, Effect.COLOURED_DUST);
+                        } else if (ent instanceof Wolf) {
+                            ((Wolf) ent).setHealth(0.5);
+                        } else if (ent instanceof Player) {
+                            Title.sendTitle((Player) ent, 0, 20, 5, e.getRightClicked().getCustomName(), "§factivé par " + e.getPlayer());
+                            Utils.playSound((Player) ent, ent.getLocation(), Sound.BLAZE_BREATH, 3);
+                        }
+                    }
+
+                    ok = true;
+                    e.getRightClicked().remove();
+                    break;
+            }
+
+
         }
     }
 
@@ -613,11 +696,12 @@ public class ListenerClass implements Listener {
                                                 player.teleport(loc);
                                             }
                                         }
+                                        inst.getDataPlayers().get(p).addXp(10);
                                         inst.getPlayerManager().setRevived(pl, false);
                                         cancel();
                                     }
                                 }
-                            }.runTaskTimer((Plugin) inst, 20, 20);
+                            }.runTaskTimer(inst, 20, 20);
 
                         }
 

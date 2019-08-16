@@ -1,25 +1,23 @@
 package fr.senseijuba.survivor.cycle;
 
-import com.mysql.jdbc.Util;
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.atouts.Atout;
 import fr.senseijuba.survivor.atouts.AtoutListener;
 import fr.senseijuba.survivor.managers.GameState;
 import fr.senseijuba.survivor.map.Zone;
 import fr.senseijuba.survivor.mobs.AbstractMob;
-import fr.senseijuba.survivor.mobs.Dog;
+import fr.senseijuba.survivor.utils.ItemBuilder;
 import fr.senseijuba.survivor.utils.ScoreboardSign;
 import fr.senseijuba.survivor.utils.Title;
 import fr.senseijuba.survivor.utils.Utils;
 import fr.senseijuba.survivor.weapons.AbstractWeapon;
+import fr.senseijuba.survivor.weapons.WeaponManager;
 import lombok.Getter;
-import lombok.Setter;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
@@ -253,7 +251,7 @@ public class GameCycle extends BukkitRunnable {
                         inst.getPlayerManager().getDeadbodies().get(player).destroyDeadBodies(player);
                         inst.getPlayerWeapon().get(player).clear();
 
-                        for(AbstractWeapon weapon : inst.getWeaponManager().listWeapons()){
+                        for (AbstractWeapon weapon : WeaponManager.listWeapons()) {
                             if(weapon.getName().equals("M1911"))
                                 inst.getPlayerWeapon().put(player.getUniqueId(), Arrays.asList(weapon));
                             player.getInventory().addItem(weapon.getItem(1));
@@ -272,7 +270,6 @@ public class GameCycle extends BukkitRunnable {
 
                 }
             }
-
 
             for(Player player : Bukkit.getOnlinePlayers()){
                 player.sendMessage("§f┼──────§b──────§3────────────§b──────§f──────┼"
@@ -327,7 +324,7 @@ public class GameCycle extends BukkitRunnable {
             i--;
 
             if(vagueState.equals(VagueState.SPAWNING)) {
-                sb.setLine(i, "§6Zombies restants: " + inst.getPlayerManager().getKills().get(player.getUniqueId()));
+                sb.setLine(i, "§6Zombies restants: " + zombies);
                 i--;
                 sb.setLine(i, "§6Total kill: " + inst.getPlayerManager().getKills().get(player.getUniqueId()));
                 i--;
@@ -342,6 +339,18 @@ public class GameCycle extends BukkitRunnable {
             sb.setLine(i, "§8");
         }
 
+        boolean alldead = true;
+        for (Player plspls : Bukkit.getOnlinePlayers()) {
+            if (!inst.getPlayerManager().isDead(plspls)) {
+                alldead = false;
+            }
+        }
+
+        if (alldead) {
+            updateStats();
+            inst.gameOver();
+            cancel();
+        }
 
         //spawn
         if(new Random(3).nextInt() == 1 && spawned<tospawn && vagueState.equals(VagueState.SPAWNING)){
@@ -354,6 +363,123 @@ public class GameCycle extends BukkitRunnable {
                     tospawn++;
                 }
             }
+        }
+
+        //spawn special item
+        if (timer == 0 && new Random(2).nextInt() == 0) {
+            new BukkitRunnable() {
+
+                int dataClay = Arrays.asList(1, 2, 3, 4, 5).get(new Random(4).nextInt());
+                Location loc = ((Player) Bukkit.getOnlinePlayers().toArray()[new Random(Bukkit.getOnlinePlayers().size() - 1).nextInt()]).getLocation();
+                ArmorStand armorStand;
+                int timer = 0;
+                float angle = 0;
+                double updown = 0.5f;
+                double ref = 0.0f;
+                boolean up = false;
+                boolean spawned = false;
+
+                @Override
+                public void run() {
+
+                    if (armorStand == null) {
+                        cancel();
+                    }
+
+                    if (timer == 20 * 30) {
+
+                        if (armorStand == null) {
+                            cancel();
+                        }
+
+                        String name = "§2";
+
+                        switch (dataClay) {
+                            case (1):
+                                name += "La nuke";
+                                break;
+                            case (2):
+                                name += "Munition max";
+                                break;
+                            case (3):
+                                name += "Charpentier";
+                                break;
+                            case (4):
+                                name += "Boite à 10";
+                                break;
+                            case (5):
+                                name += "Mort instantanée";
+                                break;
+                        }
+
+                        ItemStack item = new ItemBuilder(Material.STAINED_CLAY)
+                                .data(dataClay)
+                                .name(name)
+                                .build();
+
+                        if (armorStand == null) {
+                            cancel();
+                        }
+
+                        armorStand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
+                        armorStand.setCustomName(name);
+                        armorStand.setCustomNameVisible(false);
+                        armorStand.setBasePlate(false);
+                        armorStand.setGravity(false);
+                        armorStand.setVisible(false);
+                        armorStand.setSmall(true);
+
+                        loc = armorStand.getLocation();
+                        updown = loc.getY();
+                        ref = loc.getY();
+
+                        armorStand.setHelmet(item);
+                    }
+
+                    if (armorStand == null) {
+                        cancel();
+                    }
+
+                    if (spawned) {
+                        if (angle < 360) {
+                            angle++;
+                        } else {
+                            angle = 0;
+                        }
+
+                        if (updown == ref - 0.5f) {
+                            up = true;
+                        } else if (updown == ref + 0.5f) {
+                            up = false;
+                        }
+
+                        if (up) {
+                            updown += 0.1f;
+                        } else {
+                            updown -= 0.1f;
+                        }
+
+                        if (armorStand == null) {
+                            cancel();
+                        }
+
+                        loc.setYaw(angle);
+                        loc.setY(updown);
+
+                        armorStand.teleport(loc);
+                    }
+
+                    if (armorStand == null) {
+                        cancel();
+                    }
+
+                    timer++;
+                }
+            }.runTaskTimer(inst, 1, 1);
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.getInventory().remove(Material.STAINED_CLAY);
         }
 
         if(count<5)
@@ -433,6 +559,10 @@ public class GameCycle extends BukkitRunnable {
     public void updateStats(){
         for(UUID uuid : kills.keySet()){
             inst.getPlayerManager().addKills(uuid, count);
+        }
+
+        for (UUID uuid : deaths.keySet()) {
+            inst.getPlayerManager().addDeaths(uuid, count);
         }
     }
 }

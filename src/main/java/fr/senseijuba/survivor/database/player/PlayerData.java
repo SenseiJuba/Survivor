@@ -13,6 +13,11 @@ public class PlayerData {
     @Getter @Setter private double xp;
     @Getter @Setter private double xptolvl;
 
+    public void addXp(int xp) {
+        this.xp += xp;
+        updateXp();
+    }
+
     public boolean updateXp(){
 
         xptolvl = lvl >= 50 ? 5000 : lvl * 100;

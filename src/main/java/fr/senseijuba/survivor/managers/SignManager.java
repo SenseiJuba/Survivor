@@ -1,10 +1,10 @@
 package fr.senseijuba.survivor.managers;
 
 import fr.senseijuba.survivor.Survivor;
-import fr.senseijuba.survivor.atouts.Atout;
 import fr.senseijuba.survivor.map.Zone;
 import fr.senseijuba.survivor.utils.ItemBuilder;
 import fr.senseijuba.survivor.weapons.AbstractWeapon;
+import fr.senseijuba.survivor.weapons.WeaponManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -14,7 +14,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -41,7 +40,7 @@ public class SignManager implements Listener {
         Block b = e.getBlockPlaced();
         AbstractWeapon weapon = null;
 
-        for (AbstractWeapon weapons : inst.getWeaponManager().listWeapons()){
+        for (AbstractWeapon weapons : WeaponManager.listWeapons()) {
             if(e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(weapons.getName()))
                 weapon = weapons;
         }
@@ -71,6 +70,7 @@ public class SignManager implements Listener {
                         if(inst.getPlayerManager().getMoney().get(e.getPlayer()) >= zone.getCost()){
                             zone.openZone(e.getPlayer());
                             inst.getPlayerManager().removeMoney(e.getPlayer(), zone.getCost());
+                            inst.getDataPlayers().get(e.getPlayer()).addXp(10);
                         }
                         else{
                             e.getPlayer().sendMessage("§cVous n'avez pas assez d'argent");
@@ -82,7 +82,7 @@ public class SignManager implements Listener {
                 String name = Arrays.asList(type.split(" ")).get(1);
                 int cost = Integer.parseInt(Arrays.asList(sign.getLine(1).split(" ")).get(1));
 
-                for(AbstractWeapon weapon : inst.getWeaponManager().listWeapons()){
+                for (AbstractWeapon weapon : WeaponManager.listWeapons()) {
                     if(weapon.getName().equalsIgnoreCase(name)){
                         if(inst.getPlayerManager().getMoney().get(e.getPlayer()) >= cost){
                             e.getPlayer().openInventory(weaponBuyInventory(e.getPlayer()));
@@ -101,7 +101,7 @@ public class SignManager implements Listener {
 
             AbstractWeapon weapon = null;
 
-            for(AbstractWeapon weapons : inst.getWeaponManager().listWeapons()){
+            for (AbstractWeapon weapons : WeaponManager.listWeapons()) {
                 if(weaponWanted.get(player.getUniqueId()).equals(weapons)){
                     weapon = weapons;
                     continue;
