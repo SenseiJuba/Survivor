@@ -2,7 +2,6 @@ package fr.senseijuba.survivor.commands.survivorcommands;
 
 import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.Survivor;
-import fr.senseijuba.survivor.managers.GameManager;
 import fr.senseijuba.survivor.utils.Utils;
 import org.bukkit.entity.Player;
 
@@ -14,7 +13,7 @@ public class SpawnpointCommand extends SurvivorArgCommand {
     }
 
     @Override
-    public void execute(Player p, GameManager gm, String[] args)
+    public void execute(Player p, String[] args)
     {
 
         Map map = Survivor.getInstance().worldtoMap(p.getWorld());

@@ -11,7 +11,7 @@ public class RocketLauncher extends AbstractThingLauncher
 {
 	public RocketLauncher()
 	{
-		super("Lance Roquette", Material.STONE_AXE, 1, 7.2, 13, false, "guns.liberateur", 30, EntityType.FIREBALL, 9, 16, 1.5, "�6Recharge : �a7.2s", "�6Lance une roquette qui explose au contact");
+	super("Lance Roquette", Material.STONE_AXE, 1, 1, 7.2, 13, false, "guns.liberateur", 30, EntityType.FIREBALL, 9, 16, 1.5, "�6Recharge : �a7.2s", "�6Lance une roquette qui explose au contact");
 	}
 	
 	@Override

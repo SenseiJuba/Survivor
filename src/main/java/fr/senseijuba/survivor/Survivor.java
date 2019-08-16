@@ -56,7 +56,7 @@ public class Survivor extends JavaPlugin {
     @Getter
     HashMap<UUID, List<AbstractWeapon>> playerWeapon = new HashMap<>();
 
-    private HashMap<World, GameManager> gameManagers;
+
     private HashMap<String, ItemStack> specialItems;
     private HashMap<Map, Integer> vote;
     private HashMap<Player, Map> playervote;
@@ -104,7 +104,6 @@ public class Survivor extends JavaPlugin {
         playerManager = new PlayerManager();
         mobManager = new MobManager();
         barricadeManager = new BarricadeManager(instance);
-        gameManagers = new HashMap<World, GameManager>();
         gameState = GameState.SPAWN;
 
         for(int i=0;i<5;i++){
@@ -148,12 +147,7 @@ public class Survivor extends JavaPlugin {
             @Override
             public void run()//SAVES
             {
-                if(!SurvivorCommand.configDebug)
-                    for(World w : gameManagers.keySet())
-                        gameManagers.get(w).saveInConfig();
-
-                else
-                    ConfigEntries.init(getConfig());
+                ConfigEntries.init(getConfig());
             }
         }.runTaskTimer(this, 1200, 1200);
     }

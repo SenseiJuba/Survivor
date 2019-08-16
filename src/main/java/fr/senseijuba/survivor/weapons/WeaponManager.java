@@ -2,7 +2,6 @@ package fr.senseijuba.survivor.weapons;
 
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.commands.SurvivorCommand;
-import fr.senseijuba.survivor.managers.GameManager;
 import fr.senseijuba.survivor.utils.Utils;
 import fr.senseijuba.survivor.weapons.guns.*;
 import fr.senseijuba.survivor.weapons.guns.shotguns.OLYMPIA;
@@ -77,9 +76,6 @@ public class WeaponManager
 	
 	public static boolean doEffectAndReload(ItemStack eItem, Player p, UUID pid, long differenceTemps) //TODO UNDERSTAND
 	{
-		if(!GameManager.getInstance(p.getWorld()).getPlayers().contains(p.getUniqueId()))
-			return false;
-		
 //		Survivor.debug(p.getGameMode());
 
 //		if(p.getGameMode().equals(GameMode.SPECTATOR))

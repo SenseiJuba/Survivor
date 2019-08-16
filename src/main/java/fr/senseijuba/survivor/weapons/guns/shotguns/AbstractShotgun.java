@@ -5,20 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import fr.senseijuba.survivor.Survivor;
+import fr.senseijuba.survivor.managers.GameState;
+import fr.senseijuba.survivor.utils.Utils;
 import fr.senseijuba.survivor.weapons.guns.AbstractGun;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
-
-import fr.lumin0u.vertix.SuperPower;
-import fr.lumin0u.vertix.managers.GameManager;
-import fr.lumin0u.vertix.managers.PlayerManager;
-import fr.lumin0u.vertix.utils.Utils;
-import fr.lumin0u.vertix.weapons.guns.AbstractGun;
 
 public abstract class AbstractShotgun extends AbstractGun
 {
@@ -48,15 +49,6 @@ public abstract class AbstractShotgun extends AbstractGun
 	
 			boolean stop = false;
 			
-			try
-			{
-				if(PlayerManager.getInstance().getSP(p) != null && PlayerManager.getInstance().getSP(p).equals(SuperPower.AIMBOT))
-				precision = getClass().newInstance().precision*0.6;
-			}catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-			
 			increase.setX(increase.getX()+(new Random().nextBoolean() ? new Random().nextDouble() % precision/10 : 0-new Random().nextDouble() % precision/10));
 			
 			increase.setY(increase.getY()+(new Random().nextBoolean() ? new Random().nextDouble() % precision/10 : 0-new Random().nextDouble() % precision/10));
@@ -72,25 +64,21 @@ public abstract class AbstractShotgun extends AbstractGun
 				
 				p.getWorld().spigot().playEffect(point, Effect.COLOURED_DUST, 0, 0, (float) 1/ 255, (float) 0/ 255, (float) 0/ 255, 1, 0, 100);
 				
-				if(PlayerManager.getInstance().getSP(p) != null && PlayerManager.getInstance().getSP(p).equals(SuperPower.DMG))
-					p.getWorld().spigot().playEffect(point, Effect.COLOURED_DUST, 0, 0, 1f, 0f, 0f, 1, 0, 100);//RED
-				
-				else
-					p.getWorld().spigot().playEffect(point, Effect.COLOURED_DUST, 0, 0, (float) 1/ 255, (float) 0/ 255, (float) 0/ 255, 1, 0, 100);
+				p.getWorld().spigot().playEffect(point, Effect.COLOURED_DUST, 0, 0, (float) 1/ 255, (float) 0/ 255, (float) 0/ 255, 1, 0, 100);
 	
 				stop = false;
 	
 				for(Player ent : p.getWorld().getPlayers())
 				{
-					if(GameManager.getInstance(p.getWorld()).sameTeam(p, ent) || ent.isDead())
+					if(ent.isDead())
 						continue;
 					
 					if(!nearestPoint.containsKey(ent) || nearestPoint.get(ent).distance(ent.getEyeLocation()) > point.distance(ent.getEyeLocation()))
 						nearestPoint.put(ent, point.clone());
 					
-					if(PlayerManager.bodyCub(ent).hasInside(point) || PlayerManager.headCub(ent).hasInside(point))
+					if(Survivor.getInstance().getPlayerManager().bodyCub(ent).hasInside(point) || Survivor.getInstance().getPlayerManager().headCub(ent).hasInside(point))
 					{
-						if(GameManager.damageTF(ent, p, damage, increase.clone().normalize().multiply(knockback/3), point))
+						if(damageTF(ent, p, damage, increase.clone().normalize().multiply(knockback/3), point))
 						{
 							for(int i = 0; i < 10; i++)
 								p.getWorld().playEffect(point, Effect.TILE_BREAK, 152);
@@ -135,5 +123,41 @@ public abstract class AbstractShotgun extends AbstractGun
 		for(Player ent : nearestPoint.keySet())
 			if(!alreadyHit.contains(ent))
 				Utils.playSound(ent, nearestPoint.get(ent), "guns.fieew", 3);
+	}
+
+	public static boolean damageTF(Entity victim, Player damager, double damage, Vector kb)
+	{
+		return damageTF(victim, damager, damage, kb, victim.getLocation().clone().add(0, 1.9, 0));
+	}
+
+	public static boolean damageTF(Entity victim, Player damager, double damage, Vector kb, Location damagePoint)
+	{
+		return damageTF(victim, damager, damage, kb, damagePoint, false);
+	}
+
+	@SuppressWarnings("deprecation")
+	public static boolean damageTF(Entity victim, Player damager, double damage, Vector kb, Location damagePoint, boolean thorns)
+	{
+		if(!Survivor.getInstance().gameState.equals(GameState.STARTED))
+			return false;
+
+		if(damager != null)
+			if(victim instanceof Player || !(victim instanceof Creature) || victim.isDead())
+				return false;
+
+		if(victim instanceof Creature) {
+			Creature v = (Creature) victim;
+
+			if(v == null)
+				return false;
+
+			v.setVelocity(v.getVelocity().add(kb));
+
+			v.setLastDamageCause(new EntityDamageByEntityEvent(damager, v, EntityDamageEvent.DamageCause.PROJECTILE, damage));
+
+			Utils.playSound(v.getLocation(), "player.shot", 20);
+		}
+
+		return true;////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 }

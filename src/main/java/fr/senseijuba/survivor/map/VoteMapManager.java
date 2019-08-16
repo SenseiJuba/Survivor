@@ -1,33 +1,27 @@
 package fr.senseijuba.survivor.map;
 
 import fr.senseijuba.survivor.Survivor;
-import fr.senseijuba.survivor.cycle.GameCycle;
 import fr.senseijuba.survivor.managers.GameState;
-import fr.senseijuba.survivor.spawn.item.SpawnItem;
-import fr.senseijuba.survivor.spawn.items.SimpleSpawnItem;
 import fr.senseijuba.survivor.utils.ItemBuilder;
 import fr.senseijuba.survivor.utils.config.ConfigEntries;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class VoteMapManager implements Listener {

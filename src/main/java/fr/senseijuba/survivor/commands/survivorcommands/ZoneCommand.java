@@ -2,7 +2,6 @@ package fr.senseijuba.survivor.commands.survivorcommands;
 
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.map.Zone;
-import fr.senseijuba.survivor.managers.GameManager;
 import fr.senseijuba.survivor.utils.Cuboid;
 import fr.senseijuba.survivor.utils.Utils;
 import org.bukkit.Location;
@@ -25,7 +24,7 @@ public class ZoneCommand extends SurvivorArgCommand {
     }
 
     @Override
-    public void execute(Player p, GameManager gm, String[] args) {
+    public void execute(Player p, String[] args) {
 
         String zoneHelp = "§0------------------------------------------------"//
                 + "\n§2-Utilisation de la commande /survivor zone : "//

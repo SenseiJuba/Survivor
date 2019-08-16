@@ -2,20 +2,16 @@ package fr.senseijuba.survivor.atouts;
 
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.utils.ItemBuilder;
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerInventoryEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.*;
@@ -207,7 +203,7 @@ public class AtoutListener implements Listener {
                     inst.getPlayerManager().setSpeedCola(player, true);
                     break;
                 case(4):
-                    inst.getPlayerManager().setThreeWeapons(player, true);//TODO ALL ATOUTS APPLICATION
+                    inst.getPlayerManager().setThreeWeapons(player, true);
                     break;
                 case(5):
                     inst.getPlayerManager().setQuickRevive(player, true);

@@ -47,7 +47,7 @@ public class PacketUtils
 
 		if(o.getClass().isEnum())
 		{
-			print(indent + "�cenum...");
+			print(indent + "§cenum...");
 			return;
 		}
 
@@ -58,7 +58,7 @@ public class PacketUtils
 			f.setAccessible(true);
 
 			if(f.get(o) == null)
-				print(indent + "�cnull");
+				print(indent + "§cnull");
 			else
 			{
 				Class<?> fType = f.get(o).getClass();
@@ -66,49 +66,49 @@ public class PacketUtils
 				if(fType.isArray())
 				{
 					if(Array.getLength(f.get(o)) > 1000)
-						print("�b" + indent + f.getName() + "=" + f.get(o).getClass().getSimpleName() + ": " + f.get(o) + "�e>1000");
+						print("§b" + indent + f.getName() + "=" + f.get(o).getClass().getSimpleName() + ": " + f.get(o) + "§e>1000");
 
 					else
 						for(int k = 0; k < Array.getLength(f.get(o)); k++)
 						{
 							Object current = Array.get(f.get(o), k);
 							if(current == null)
-								print("�a" + indent + f.getName() + "[" + k + "]=�cnull");
+								print("§a" + indent + f.getName() + "[" + k + "]=§cnull");
 
 							else if(isPrimitive(current.getClass()))
-								print("�b" + indent + f.getName() + "[" + k + "]=" + current);
+								print("§b" + indent + f.getName() + "[" + k + "]=" + current);
 
 							else
 							{
-								print("�a" + indent + f.getName() + "[" + k + "]=" + current.getClass().getSimpleName());
+								print("§a" + indent + f.getName() + "[" + k + "]=" + current.getClass().getSimpleName());
 								printFields(current, indent + "    ");
 							}
 						}
 				}
 
 				else if(isPrimitive(fType))
-					print("�b" + indent + f.getName() + "=" + f.get(o).getClass().getSimpleName() + ": " + f.get(o));
+					print("§b" + indent + f.getName() + "=" + f.get(o).getClass().getSimpleName() + ": " + f.get(o));
 
 				else if(Iterable.class.isAssignableFrom(fType))
 				{
 					for(Object it : (Iterable<?>) f.get(o))
 					{
 						if(it == null)
-							print("�a" + indent + f.getName() + "[" + i++ + "]=�cnull");
+							print("§a" + indent + f.getName() + "[" + i++ + "]=§cnull");
 
 						else if(isPrimitive(it.getClass()))
-							print("�b" + indent + f.getName() + "[" + i++ + "]=" + it);
+							print("§b" + indent + f.getName() + "[" + i++ + "]=" + it);
 
 						else
 						{
-							print("�a" + indent + f.getName() + "[" + i++ + "]=" + it.getClass().getSimpleName());
+							print("§a" + indent + f.getName() + "[" + i++ + "]=" + it.getClass().getSimpleName());
 							printFields(it, indent + "    ");
 						}
 					}
 				}
 				else
 				{
-					print("�a" + indent + f.getName() + "=" + f.get(o).getClass().getSimpleName());
+					print("§a" + indent + f.getName() + "=" + f.get(o).getClass().getSimpleName());
 					printFields(f.get(o), indent + "    ");
 				}
 			}

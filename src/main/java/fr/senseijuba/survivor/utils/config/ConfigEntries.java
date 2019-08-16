@@ -21,10 +21,6 @@ public class ConfigEntries {
 
     public static String INFO_PREFIX, ERROR_PREFIX, CHAT_PREFIX;
 
-    public static String E_PERM, E_404, E_KICK, E_NOTINARENA;
-
-    public static String PING_RESULT;
-
     public static String STARTIN;
 
     public static String DEATH_MSG, DEATH_MSG_ALL;
@@ -32,16 +28,6 @@ public class ConfigEntries {
     public static String INVENTORY_VOTEMAP, INVENTORY_VOTEMAP_PANE, INVENTORY_VOTEMAP_LORE;
 
     public static String ATOUT_BARRICADE, ATOUT_USE, ATOUT_USE_ALL;
-
-    public static String REPORT_NOTIFICATION, REPORT_COOLDOWN_MESSAGE, REPORT_SUCCESSFUL;
-    public static long REPORT_COOLDOWN;
-
-    public static String STATS_OVERVIEW;
-
-    public static String SCOREBOARD_LOBBY;
-    public static String SCOREBOARD_MATCH;
-    public static String SCOREBOARD_PARTY;
-    public static String SCOREBOARD_QUEUE;
 
     public static void formatAndSend(CommandSender sendTo, String in, Object... values) {
         sendTo.sendMessage(String.format(in, values));
@@ -62,13 +48,6 @@ public class ConfigEntries {
         Prefix.INFO = INFO_PREFIX;
         Prefix.ERROR = ERROR_PREFIX;
 
-        E_PERM = ERROR_PREFIX + c(config.getString("error.permission"));
-        E_404 = ERROR_PREFIX + c(config.getString("error.notfound"));
-        E_KICK = ERROR_PREFIX + c(config.getString("error.arena.kick"));
-        E_NOTINARENA = ERROR_PREFIX + c(config.getString("error.arena.playernotfound"));
-
-        PING_RESULT = INFO_PREFIX + c(config.getString("ping.result"));
-
         STARTIN = INFO_PREFIX + c(config.getString("startin"));
 
         DEATH_MSG = c(config.getString("death.msg"));
@@ -82,18 +61,6 @@ public class ConfigEntries {
         ATOUT_USE = c(config.getString("atout.use"));
         ATOUT_USE_ALL = INFO_PREFIX + c(config.getString("atout.use.all"));
 
-        REPORT_NOTIFICATION = INFO_PREFIX + c(config.getString("report.notification"));
-        REPORT_COOLDOWN_MESSAGE = INFO_PREFIX + c(config.getString("report.cooldown.error"));
-        REPORT_SUCCESSFUL = INFO_PREFIX + c(config.getString("report.successful"));
-
-        REPORT_COOLDOWN = config.getInt("report.cooldown.amount");
-
-        STATS_OVERVIEW = INFO_PREFIX + c(config.getString("stats.overview"));
-
-        SCOREBOARD_LOBBY = c(config.getString("scoreboard.lobby"));
-        SCOREBOARD_MATCH = c(config.getString("scoreboard.match"));
-        SCOREBOARD_PARTY = c(config.getString("scoreboard.party"));
-        SCOREBOARD_QUEUE = c(config.getString("scoreboard.queue"));
 
 
             FileConfiguration file = null;

@@ -1,7 +1,6 @@
 package fr.senseijuba.survivor.commands.survivorcommands;
 
 import fr.senseijuba.survivor.Survivor;
-import fr.senseijuba.survivor.managers.GameManager;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -18,7 +17,7 @@ public class TipsCommand extends SurvivorArgCommand {
     }
 
     @Override
-    public void execute(Player p, GameManager gm, String[] args)
+    public void execute(Player p, String[] args)
     {
         if(saveTipsRunnable != null)
             saveTipsRunnable.cancel();

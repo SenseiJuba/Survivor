@@ -1,7 +1,6 @@
 package fr.senseijuba.survivor.commands.survivorcommands;
 
 import fr.senseijuba.survivor.Survivor;
-import fr.senseijuba.survivor.managers.GameManager;
 import fr.senseijuba.survivor.weapons.AbstractWeapon;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -21,7 +20,7 @@ public class WeaponBuyCommand extends SurvivorArgCommand {
     }
 
     @Override
-    public void execute(Player p, GameManager gm, String[] args) {
+    public void execute(Player p, String[] args) {
 
         String Help = "§0------------------------------------------------"//
                 + "\n§2-Utilisation de la commande /survivor weaponsign : "//

@@ -3,7 +3,6 @@ package fr.senseijuba.survivor.commands;
 import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.commands.survivorcommands.*;
-import fr.senseijuba.survivor.managers.GameManager;
 import fr.senseijuba.survivor.utils.Utils;
 import fr.senseijuba.survivor.weapons.guns.AbstractGun;
 import org.bukkit.*;
@@ -132,7 +131,6 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
 
         Player p = (Player)sender;
 
-        GameManager gm = GameManager.getInstance(p.getWorld());
 
         try
         {
@@ -143,7 +141,7 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
 
                 if(c.isExecutableFrom(args[0]) && c.getMinArgs() + 1 <= args.length)
                 {
-                    c.execute(p, gm, String.join("!t'g!", args).replaceFirst(args[0], "").replaceFirst("!t'g!", "").split("!t'g!"));
+                    c.execute(p, String.join("!t'g!", args).replaceFirst(args[0], "").replaceFirst("!t'g!", "").split("!t'g!"));
 
 //					p.sendMessage("§aExecuted " + c.getName());
 
@@ -159,37 +157,14 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
             }
         }catch(Exception e)
         {
-            if(gm == null)
-            {
-                p.sendMessage("§cCe monde n'a pas été register. Utilisez '/survivor worlds'");
-                return true;
-            }
-
-            else
-            {
-                e.printStackTrace();
-                p.sendMessage("§cUne erreur est survenue lors de l'exécution de cette commande");
-                return true;
-            }
-        }
-
-        if(args[0].equalsIgnoreCase("stop"))
-        {
-            if(gm.isGameStarted())
-            {
-                gm.setStarted(false);
-
-                Utils.broadcastMessage(gm.getWorld(), "§aLa partie est arreté !");
-            }
-
-            else
-                p.sendMessage("§cLa partie est déjà arreté !");
-
+            e.printStackTrace();
+            p.sendMessage("§cUne erreur est survenue lors de l'exécution de cette commande");
             return true;
         }
-        else if(args.length > 1 && args[0].equalsIgnoreCase("victory"))
+
+        if(args.length > 1 && args[0].equalsIgnoreCase("victory"))
         {
-            gm.victory();
+            Survivor.getInstance().gameOver();
 
             return true;
         }
@@ -207,11 +182,11 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
         else if(args[0].equalsIgnoreCase("kill"))
         {
             if(args.length == 1)
-                GameManager.doDeathEffect(p, p, GameManager.getInstance(p.getWorld()));
+                Survivor.getInstance().getL().killPlayer(p);
 
             else
             {
-                GameManager.doDeathEffect(Bukkit.getPlayer(args[1]), p, GameManager.getInstance(p.getWorld()));
+                Survivor.getInstance().getL().killPlayer(Bukkit.getPlayer(args[1]));
             }
 
             return true;
@@ -374,7 +349,7 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
 
         else if(args[0].equalsIgnoreCase("reload"))
         {
-            Survivor.getInstance().reinitializeGameManager(gm);
+            Survivor.getInstance().gameOver();
 
             return true;
         }

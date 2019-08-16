@@ -110,13 +110,11 @@ public abstract class AbstractGun extends AbstractWeapon
 
 								if(Survivor.getInstance().getPlayerManager().isScope(p) && inst instanceof DRAGUNOV)//looking sniper
 								{
-//						TF.debug("Sniper scope");
 									damageDone = damageTF(ent, p, damage*1.5, p.getEyeLocation().getDirection().multiply(knockback/3).add(increase.clone().normalize()).multiply(0.5), point);
 								}
 
 								else//normal
 								{
-//						TF.debug("Normal hit");
 									damageDone = damageTF(ent, p, damage, p.getEyeLocation().getDirection().multiply(knockback/3).add(increase.clone().normalize()).multiply(0.5), point);
 								}
 

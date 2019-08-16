@@ -1,6 +1,5 @@
 package fr.senseijuba.survivor.commands.survivorcommands;
 
-import fr.senseijuba.survivor.managers.GameManager;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -78,5 +77,5 @@ public abstract class SurvivorArgCommand {
         return getName().equalsIgnoreCase(s) || doAliasesContainsIgnoreCase(s);
     }
 
-    public abstract void execute(Player p, GameManager gm, String[] args);
+    public abstract void execute(Player p, String[] args);
 }

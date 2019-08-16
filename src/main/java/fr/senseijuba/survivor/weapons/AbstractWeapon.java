@@ -3,7 +3,6 @@ package fr.senseijuba.survivor.weapons;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.senseijuba.survivor.weapons.guns.LaTornade;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;

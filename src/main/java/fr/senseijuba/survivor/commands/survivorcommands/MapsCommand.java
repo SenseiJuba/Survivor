@@ -2,7 +2,6 @@ package fr.senseijuba.survivor.commands.survivorcommands;
 
 import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.Survivor;
-import fr.senseijuba.survivor.managers.GameManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -16,7 +15,7 @@ public class MapsCommand extends SurvivorArgCommand {
     }
 
     @Override
-    public void execute(Player p, GameManager gm, String[] args)
+    public void execute(Player p, String[] args)
     {
         String mapsHelp = "§0------------------------------------------------"//
                 + "\n§2-Utilisation de la commande /survivor maps : "//
@@ -95,12 +94,7 @@ public class MapsCommand extends SurvivorArgCommand {
             }
         }
 
-
-        if(gm == null)
-            p.sendMessage("§cCe monde n'a pas été register. Utilisez '/survivor maps register'");
-
-        else
-            p.sendMessage(mapsHelp);
+        p.sendMessage(mapsHelp);
 
         return;
     }

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.commands.SurvivorCommand;
+import fr.senseijuba.survivor.utils.Cuboid;
 import fr.senseijuba.survivor.utils.DeadBodies;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -19,22 +20,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.EulerAngle;
-
-import fr.lumin0u.vertix.Kit;
-import fr.lumin0u.vertix.SuperPower;
-import fr.lumin0u.vertix.TF;
-import fr.lumin0u.vertix.Team;
-import fr.lumin0u.vertix.commands.TfCommand;
-import fr.lumin0u.vertix.utils.Cuboid;
-import fr.lumin0u.vertix.utils.FireCause;
-import fr.lumin0u.vertix.weapons.AbstractWeapon;
-import fr.lumin0u.vertix.weapons.WeaponManager;
-import fr.lumin0u.vertix.weapons.blocks.C4;
-import fr.lumin0u.vertix.weapons.blocks.CanonMontable;
-import fr.lumin0u.vertix.weapons.blocks.Mine;
 
 public class PlayerManager
 {
@@ -53,7 +38,6 @@ public class PlayerManager
 	@Getter private HashMap<UUID, DeadBodies> deadbodies;
 	@Getter private HashMap<UUID, Integer> kills;
 	@Getter private HashMap<UUID, Integer> deaths;
-	private HashMap<UUID, FireCause> fireCause;
 	private HashMap<Player, Integer> heavyBulletNb;
 	private Player modifyZone1;
 	private Player modifyZone2;
@@ -66,16 +50,15 @@ public class PlayerManager
 		hasThreeWeapons = new HashMap<>();
 		hasQuickRevive = new HashMap<>();
 		hasGrave = new HashMap<>();
-		fireCause = new HashMap<>();
 		heavyBulletNb = new HashMap<>();
 		money = new HashMap<>();
 		kills = new HashMap<>();
 		deaths = new HashMap<>();
 
-		File check = new File(TF.getInstance().getDataFolder(), "players.yml");
+		File check = new File(Survivor.getInstance().getDataFolder(), "players.yml");
 
-		if(!TF.getInstance().getDataFolder().exists())
-			TF.getInstance().getDataFolder().mkdir();
+		if(!Survivor.getInstance().getDataFolder().exists())
+			Survivor.getInstance().getDataFolder().mkdir();
 
 		try
 		{
@@ -93,7 +76,7 @@ public class PlayerManager
 	{
 		try
 		{
-			file.save(new File(TF.getInstance().getDataFolder(), "players.yml"));
+			file.save(new File(Survivor.getInstance().getDataFolder(), "players.yml"));
 		}catch(IOException e)
 		{
 			e.printStackTrace();
@@ -124,20 +107,6 @@ public class PlayerManager
 		}
 
 		tipsActive.replace(p.getUniqueId(), tipsActived);
-	}
-
-	public FireCause getFireCauseOf(Player p)
-	{
-		if(fireCause.containsKey(p.getUniqueId()))
-			return fireCause.get(p.getUniqueId());
-
-		else
-			return new FireCause(true, null, null);
-	}
-
-	public void setFireCauseOf(Player p, FireCause cause)
-	{
-		fireCause.put(p.getUniqueId(), cause);
 	}
 
 	public boolean hasDoubleCoup(Player p)
@@ -323,7 +292,6 @@ public class PlayerManager
 
 		hasDoubleCoup.remove(p.getUniqueId());
 		hasSpeedCola.remove(p.getUniqueId());
-		fireCause.remove(p.getUniqueId());
 		heavyBulletNb.remove(p);
 	}
 
