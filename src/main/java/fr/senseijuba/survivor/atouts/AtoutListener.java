@@ -1,6 +1,7 @@
 package fr.senseijuba.survivor.atouts;
 
 import fr.senseijuba.survivor.Survivor;
+import fr.senseijuba.survivor.managers.GameState;
 import fr.senseijuba.survivor.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -32,7 +33,7 @@ public class AtoutListener implements Listener {
 
         ItemStack item = e.getItem();
 
-        if (item == null || !e.getAction().equals(Action.RIGHT_CLICK_AIR) || !e.getItem().isSimilar(Atout.nameTag())){
+        if (item == null || !e.getAction().equals(Action.RIGHT_CLICK_AIR) || !e.getItem().isSimilar(Atout.nameTag()) || inst.gameState.equals(GameState.STARTED)) {
             return;
         }
 

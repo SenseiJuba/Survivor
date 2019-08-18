@@ -1,7 +1,7 @@
 package fr.senseijuba.survivor.utils.config;
 
-import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.Survivor;
+import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.map.Zone;
 import fr.senseijuba.survivor.utils.Cuboid;
 import fr.senseijuba.survivor.utils.Prefix;
@@ -12,10 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import java.io.File;
-import java.io.IOException;
 
 public class ConfigEntries {
 
@@ -41,53 +37,28 @@ public class ConfigEntries {
     }
 
     public static void init(FileConfiguration config) {
-        INFO_PREFIX = c(config.getString("prefix.info"));
-        ERROR_PREFIX = c(config.getString("prefix.error"));
-        CHAT_PREFIX = c(config.getString("prefix.chat"));
+        INFO_PREFIX = c("&a&lSurvivor §8»§7 ");
+        ERROR_PREFIX = c("&c&lSurvivor §8»§7 ");
+        CHAT_PREFIX = c("&c[&lSurvivor&f&c]");
 
         Prefix.INFO = INFO_PREFIX;
         Prefix.ERROR = ERROR_PREFIX;
 
-        STARTIN = INFO_PREFIX + c(config.getString("startin"));
+        STARTIN = INFO_PREFIX + c("La partie va commencé dans : %1$s second(s)");
 
-        DEATH_MSG = c(config.getString("death.msg"));
-        DEATH_MSG_ALL = INFO_PREFIX + c(config.getString("death.msg.all"));
+        DEATH_MSG = c("Vous êtes mort par un %2$s");
+        DEATH_MSG_ALL = INFO_PREFIX + c("%1$s est mort par un %2$s, allez le réssucitez");
 
-        INVENTORY_VOTEMAP = c(config.getString("inventory.votemap"));
-        INVENTORY_VOTEMAP_LORE = c(config.getString("inventory.votemap.lore"));
-        INVENTORY_VOTEMAP_PANE = c(config.getString("inventory.votemap.pane"));
+        INVENTORY_VOTEMAP = c("Votez pour la map");
+        INVENTORY_VOTEMAP_LORE = c("Votez pour la map %1$s");
+        INVENTORY_VOTEMAP_PANE = c("Clicker sur l'item pour/Voter pour la map");
 
-        ATOUT_BARRICADE = c(config.getString("atout.barricade.name"));
-        ATOUT_USE = c(config.getString("atout.use"));
-        ATOUT_USE_ALL = INFO_PREFIX + c(config.getString("atout.use.all"));
+        ATOUT_BARRICADE = c("Barricade");
+        ATOUT_USE = c("");
+        ATOUT_USE_ALL = INFO_PREFIX + c("%1$s a utilisé l'atout barricade");
 
 
-
-            FileConfiguration file = null;
-
-            File check = new File(Survivor.getInstance().getDataFolder(), "config.yml");
-
-            if(!Survivor.getInstance().getDataFolder().exists())
-                Survivor.getInstance().getDataFolder().mkdir();
-
-            if(!check.exists())
-            {
-                try
-                {
-                    check.createNewFile();
-                }catch(IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-
-            try
-            {
-                file = YamlConfiguration.loadConfiguration(check);
-            }catch(NullPointerException ex)
-            {
-                ex.printStackTrace();
-            }
+        FileConfiguration file = config;
 
             if(file.contains("tips")) {
                 for (String tip : file.getStringList("tips")) {
@@ -168,7 +139,7 @@ public class ConfigEntries {
                         Survivor.getInstance().maps.add(map);
                     }
                 } catch (Exception e) {
-                    Survivor.getInstance().maps.remove(null);
+                    System.out.println("check check check");
                 }
 
             }

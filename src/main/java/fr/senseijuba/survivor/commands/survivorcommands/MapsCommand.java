@@ -1,11 +1,12 @@
 package fr.senseijuba.survivor.commands.survivorcommands;
 
-import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.Survivor;
+import fr.senseijuba.survivor.map.Map;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapsCommand extends SurvivorArgCommand {
 
@@ -19,9 +20,9 @@ public class MapsCommand extends SurvivorArgCommand {
     {
         String mapsHelp = "§0------------------------------------------------"//
                 + "\n§2-Utilisation de la commande /survivor maps : "//
-                + "\n§b-/survivor maps register §3: activer le monde dans lequel vous effectuez la commande pour que le plugin le prenne en compte"//
+                + "\n§b-/survivor maps register <name>§3: activer le monde dans lequel vous effectuez la commande pour que le plugin le prenne en compte"//
                 + "\n§b-/survivor maps list §3: vous donne la liste des mondes"//
-                + "\n§b-/survivor maps mapIcon <Material.ITEM> §3: change l'icone de la map"//
+                + "\n§b-/survivor maps mapIcon <ITEM> §3: change l'icone de la map"//
                 + "\n§b-/survivor maps place <place> §3: change le nombre de place"//
                 + "\n§b-/survivor maps unregister §3: d§sactiver le monde dans lequel vous effectuez la commande pour que le plugin ne le prenne plus en compte";
 
@@ -64,6 +65,7 @@ public class MapsCommand extends SurvivorArgCommand {
             for(Map m : Survivor.getInstance().getMaps()){
                 p.sendMessage(m.getPrefix() + m.getName());
             }
+            return;
         }
 
         else if(Survivor.getInstance().getMaps().contains(map)) {
@@ -80,7 +82,7 @@ public class MapsCommand extends SurvivorArgCommand {
                     map.setMapIcon(Material.getMaterial(args[1]));
                 }
                 else {
-                    p.sendMessage("§c" + args[1] + " n'est pas un item, écrire <Material.ITEM>");
+                    p.sendMessage("§c" + args[1] + " n'est pas un item, écrire <ITEM>");
                 }
                 return;
             }

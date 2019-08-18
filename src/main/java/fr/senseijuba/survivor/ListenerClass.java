@@ -344,6 +344,9 @@ public class ListenerClass implements Listener {
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
 
+        if (!Survivor.getInstance().getMaps().contains(Survivor.getInstance().worldtoMap(event.getEntity().getWorld())))
+            return;
+
         Entity victim = event.getEntity();
 
         if(inst.getGameState().equals(GameState.STARTED)) {
@@ -364,6 +367,9 @@ public class ListenerClass implements Listener {
     }
 
     public void onDeath(EntityDamageByEntityEvent e){
+
+        if (!Survivor.getInstance().getMaps().contains(Survivor.getInstance().worldtoMap(e.getDamager().getWorld())))
+            return;
 
         if(inst.getGameState().equals(GameState.STARTED)) {
             if (e.getEntity() instanceof Player) {
@@ -459,6 +465,10 @@ public class ListenerClass implements Listener {
 
     @EventHandler
     public void onInteractWitchArmorstand(PlayerInteractAtEntityEvent e) {
+
+        if (!Survivor.getInstance().getMaps().contains(Survivor.getInstance().worldtoMap(e.getPlayer().getWorld())))
+            return;
+
         if (e.getRightClicked() instanceof ArmorStand) {
 
             boolean ok = false;
@@ -548,6 +558,9 @@ public class ListenerClass implements Listener {
     @EventHandler
     public void onReloadOrShoot(PlayerInteractEvent e){
 
+        if (!Survivor.getInstance().getMaps().contains(Survivor.getInstance().worldtoMap(e.getPlayer().getWorld())))
+            return;
+
         if(e.getAction().equals(Action.RIGHT_CLICK_AIR) || e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
             if (!Survivor.getInstance().gameState.equals(GameState.STARTED) || e.getPlayer().getGameMode().equals(GameMode.SPECTATOR))
                 return;
@@ -584,6 +597,12 @@ public class ListenerClass implements Listener {
 
     @EventHandler
     public void onSwitchItem(PlayerItemHeldEvent e){
+
+        if (!Survivor.getInstance().getMaps().contains(Survivor.getInstance().worldtoMap(e.getPlayer().getWorld())))
+            return;
+
+        if (!inst.gameState.equals(GameState.STARTED))
+            return;
 
         AbstractWeapon weapon = null;
 

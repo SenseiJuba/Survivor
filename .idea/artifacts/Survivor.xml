@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Survivor">
+    <output-path>$PROJECT_DIR$/out/artifacts/Survivor</output-path>
+    <root id="archive" name="Survivor.jar">
+      <element id="module-output" name="Survivor" />
+      <element id="library" level="project" name="Maven: org.mariadb.jdbc:mariadb-java-client:2.4.3" />
+      <element id="library" level="project" name="Maven: org.projectlombok:lombok:1.18.4" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

@@ -2,3 +2,9 @@ name:  Survivor
 version: 1.0
 author: senseijuba
 main: fr.senseijuba.survivor.Survivor
+
+commands:
+  GetWeapon:
+    usage: /<command> <arme>
+  Survivor:
+    usage: /<command> help

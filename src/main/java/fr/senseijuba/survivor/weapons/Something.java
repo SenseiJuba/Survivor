@@ -46,7 +46,6 @@ public abstract class Something
 		ItemStack item = new ItemStack(mat);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(ChatColor.BLUE+name);
-		meta.spigot().setUnbreakable(true);
 		item.setItemMeta(meta);
 		item.setAmount(amount);
 

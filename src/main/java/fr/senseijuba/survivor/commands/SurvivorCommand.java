@@ -1,8 +1,8 @@
 package fr.senseijuba.survivor.commands;
 
-import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.Survivor;
 import fr.senseijuba.survivor.commands.survivorcommands.*;
+import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.utils.Utils;
 import fr.senseijuba.survivor.weapons.guns.AbstractGun;
 import org.bukkit.*;
@@ -162,36 +162,36 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
             return true;
         }
 
-        if(args.length > 1 && args[0].equalsIgnoreCase("victory"))
-        {
+        if(args.length > 1 && args[0].equalsIgnoreCase("victory")) {
             Survivor.getInstance().gameOver();
 
             return true;
-        }
-        else if(args[0].equalsIgnoreCase("createGun"))
-        {
-            AbstractGun gun = new AbstractGun(args[1], Material.valueOf(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]), Double.parseDouble(args[5]), Integer.parseInt(args[6]), Double.parseDouble(args[7]), Integer.parseInt(args[8]), Double.parseDouble(args[9]), Boolean.parseBoolean(args[10]), "guns." + args[11], Float.parseFloat(args[12]), 1)
-            {};
+        } else if (args.length > 2 && args[0].equalsIgnoreCase("tp")) {
+            try {
+                ((Player) sender).teleport(Bukkit.getWorld(args[2]).getSpawnLocation());
+            } catch (Exception e) {
+                sender.sendMessage("Le monde n'existe pas, vérifiez l'orthographe");
+            }
+
+            return true;
+        } else if(args[0].equalsIgnoreCase("createGun")) {
+            AbstractGun gun = new AbstractGun(args[1], Material.valueOf(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]), Double.parseDouble(args[5]), Integer.parseInt(args[6]), Double.parseDouble(args[7]), Integer.parseInt(args[8]), Double.parseDouble(args[9]), Boolean.parseBoolean(args[10]), "guns." + args[11], Float.parseFloat(args[12]), 1) {};
 
             p.getInventory().addItem(gun.getItem(1));
 
             gun.shoot(p);
 
             return true;
-        }
-        else if(args[0].equalsIgnoreCase("kill"))
-        {
+        } else if(args[0].equalsIgnoreCase("kill")) {
             if(args.length == 1)
                 Survivor.getInstance().getL().killPlayer(p);
 
-            else
-            {
+            else {
                 Survivor.getInstance().getL().killPlayer(Bukkit.getPlayer(args[1]));
             }
 
             return true;
-        }
-        else if(args[0].equalsIgnoreCase("spawn")) {
+        } else if(args[0].equalsIgnoreCase("spawn")) {
             Location coin = p.getLocation().clone().add(-50, -50, -50);
 
             for (int x = 0; x < 100; x++) {
@@ -217,10 +217,7 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
                 }
             }
             return true;
-        }
-
-        else if(args.length > 1 && args[0].equalsIgnoreCase("wshjeveuxcopiercemonde"))
-        {
+        } else if(args.length > 1 && args[0].equalsIgnoreCase("wshjeveuxcopiercemonde")) {
             File source = new File(p.getWorld().getName());
             File target = new File(String.join(" ", args).replaceFirst(args[0] + " ", ""));
 
@@ -231,19 +228,13 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
             p.sendMessage("Monde créé");
 
             return true;
-        }
-
-        else if(args.length > 1 && args[0].equalsIgnoreCase("wshjeveuxcreerunmonde"))
-        {
+        } else if(args.length > 1 && args[0].equalsIgnoreCase("wshjeveuxcreerunmonde")) {
             p.sendMessage("création ...");
             Bukkit.createWorld(new WorldCreator(String.join(" ", args).replaceFirst(args[0] + " ", "")));
             p.sendMessage("Monde créé");
 
             return true;
-        }
-
-        else if(args[0].equalsIgnoreCase("wshjeveuxcopiercemonde"))
-        {
+        } else if(args[0].equalsIgnoreCase("wshjeveuxcopiercemonde")) {
             File source = new File(p.getWorld().getName());
             File target = new File(p.getWorld().getName() + "_copie");
 
@@ -254,10 +245,7 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
             p.sendMessage("Monde créé");
 
             return true;
-        }
-
-        else if(args.length > 1 && args[0].equalsIgnoreCase("deleteworld"))
-        {
+        } else if(args.length > 1 && args[0].equalsIgnoreCase("deleteworld")) {
             Map m = null;
 
             for(Map map : Survivor.getInstance().maps){
@@ -269,54 +257,37 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
 
             if(m != null){
                 Survivor.getInstance().rmMap(m);
-            }
-            else{
+            } else{
                 p.sendMessage("§cVous n'êtes pas dans un monde");
             }
             return true;
-        }
-
-        else if(args.length > 1 && args[0].equalsIgnoreCase("gotoworld"))
-        {
+        } else if(args.length > 1 && args[0].equalsIgnoreCase("gotoworld")) {
             p.sendMessage(String.join(" ", args).replaceFirst(args[0] + " ", ""));
 
-            if(new File(String.join(" ", args).replaceFirst(args[0] + " ", "")).exists())
-            {
+            if(new File(String.join(" ", args).replaceFirst(args[0] + " ", "")).exists()) {
                 p.sendMessage("création ...");
                 Bukkit.createWorld(new WorldCreator(String.join(" ", args).replaceFirst(args[0] + " ", "")));
                 p.sendMessage("Monde créé");
             }
 
-            if(Bukkit.getWorld(String.join(" ", args).replaceFirst(args[0] + " ", "")) != null)
-            {
+            if(Bukkit.getWorld(String.join(" ", args).replaceFirst(args[0] + " ", "")) != null) {
                 p.teleport(new Location(Bukkit.getWorld(String.join(" ", args).replaceFirst(args[0] + " ", "")), p.getLocation().getX(), p.getLocation().getY(), p.getLocation().getZ()));
-            }
-
-            else
+            } else
                 p.sendMessage("Action impossible");
 
             return true;
-        }
-
-        else if(args[0].equalsIgnoreCase("wshjeveuxsavoirlesmondes"))
-        {
+        } else if(args[0].equalsIgnoreCase("wshjeveuxsavoirlesmondes")) {
             for(World w : Bukkit.getWorlds())
                 p.sendMessage(w.getName());
 
             return true;
-        }
-
-        else if(args[0].equalsIgnoreCase("wshjeveuxsavoirlesmondestout"))
-        {
+        } else if(args[0].equalsIgnoreCase("wshjeveuxsavoirlesmondestout")) {
             for(File f : Survivor.getInstance().getDataFolder().getAbsoluteFile().getParentFile().getParentFile().listFiles())
                 if(f.isDirectory() && new File(f.getAbsolutePath() + "/level.dat").exists())
                     p.sendMessage(f.getName());
 
             return true;
-        }
-
-        else if(args[0].equalsIgnoreCase("cheat"))
-        {
+        } else if(args[0].equalsIgnoreCase("cheat")) {
             if(args.length == 1)
                 for(Player pl : p.getWorld().getPlayers())
                     changeCheat(pl);
@@ -325,17 +296,11 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
                 changeCheat(Bukkit.getPlayer(args[1]));
 
             return true;
-        }
-
-        else if(args[0].equalsIgnoreCase("debug"))
-        {
+        } else if(args[0].equalsIgnoreCase("debug")) {
             debug = !debug;
 
             return true;
-        }
-
-        else if(args[0].equalsIgnoreCase("debugconfig"))
-        {
+        } else if(args[0].equalsIgnoreCase("debugconfig")) {
             configDebug = !configDebug;
 
             if(configDebug)
@@ -345,10 +310,7 @@ public class SurvivorCommand implements TabExecutor, CommandExecutor
                 Survivor.getInstance().reloadConfig();
 
             return true;
-        }
-
-        else if(args[0].equalsIgnoreCase("reload"))
-        {
+        } else if(args[0].equalsIgnoreCase("reload")) {
             Survivor.getInstance().gameOver();
 
             return true;

@@ -1,5 +1,6 @@
 package fr.senseijuba.survivor;
 
+import com.google.common.io.Files;
 import fr.senseijuba.survivor.atouts.Atout;
 import fr.senseijuba.survivor.atouts.AtoutListener;
 import fr.senseijuba.survivor.commands.GetWeapon;
@@ -9,7 +10,10 @@ import fr.senseijuba.survivor.cycle.GameCycle;
 import fr.senseijuba.survivor.database.Mariadb;
 import fr.senseijuba.survivor.database.player.PlayerData;
 import fr.senseijuba.survivor.database.player.PlayerDataManager;
-import fr.senseijuba.survivor.managers.*;
+import fr.senseijuba.survivor.managers.BarricadeManager;
+import fr.senseijuba.survivor.managers.GameState;
+import fr.senseijuba.survivor.managers.PlayerManager;
+import fr.senseijuba.survivor.managers.SignManager;
 import fr.senseijuba.survivor.map.Map;
 import fr.senseijuba.survivor.map.VoteMapManager;
 import fr.senseijuba.survivor.mobs.MobManager;
@@ -21,7 +25,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -31,6 +37,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -74,10 +81,21 @@ public class Survivor extends JavaPlugin {
     public AutoStart autoStart;
     public int timer = 60;
 
+    @Getter
+    YamlConfiguration config;
+
     @Override
     public void onEnable() {
 
-        ConfigEntries.init(getConfig());
+        config = new YamlConfiguration();
+        File file = new File(getDataFolder() + File.separator + "config.yml");
+        try {
+            config.loadFromString(Files.toString(file, StandardCharsets.UTF_8));
+        } catch (IOException | InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
+
+        ConfigEntries.init(config);
         instance = this;
         registerNMSClasses();
         maps = new ArrayList<Map>();
@@ -106,8 +124,10 @@ public class Survivor extends JavaPlugin {
         barricadeManager = new BarricadeManager(instance);
         gameState = GameState.SPAWN;
 
-        for(int i=0;i<5;i++){
-            vote.put(maps.get(new Random().nextInt(maps.size()-1)), 0);
+        if (!maps.isEmpty()) {
+            for (int i = 0; i < 5; i++) {
+                vote.put(maps.get(new Random().nextInt(maps.size())), 0);
+            }
         }
 
         getServer().getPluginManager().registerEvents(new BarricadeManager(instance), instance);
@@ -142,14 +162,7 @@ public class Survivor extends JavaPlugin {
             }
         }.runTaskLater(this, 10);
 
-        new BukkitRunnable()
-        {
-            @Override
-            public void run()//SAVES
-            {
-                ConfigEntries.init(getConfig());
-            }
-        }.runTaskTimer(this, 1200, 1200);
+
     }
 
     public static void copyWorld(File source, File target) {
@@ -317,7 +330,8 @@ public class Survivor extends JavaPlugin {
 
     public void onDisable() {
 
-        Utils.restoreWorld(currentMap.getW());
+        if (currentMap != null)
+            Utils.restoreWorld(currentMap.getW());
 
         try {
             mariadb.disconnect();

@@ -54,26 +54,28 @@ public class VoteMapManager implements Listener {
 
                 int test = inst.getVoteAleatoire();
 
-                for(int value : inst.getVote().values()){
-                    if(value > test){
-                        test = value;
+                if (inst.getVote() != null) {
+                    for (int value : inst.getVote().values()) {
+                        if (value > test) {
+                            test = value;
+                        }
                     }
-                }
 
-                for(Map map : inst.getVote().keySet()){
-                    voteInv.setItem(i, map.getMapIcon());
-                    i++;
+                    for (Map map : inst.getVote().keySet()) {
+                        voteInv.setItem(i, map.getMapIcon());
+                        i++;
 
 
-                    for(ItemStack item : voteToPane(map.getPrefix() + map.getName(), votant != 0 ? inst.getVote().get(map)/votant : 0 , inst.getVote().get(map) == test ? true : false)){
+                        for (ItemStack item : voteToPane(map.getPrefix() + map.getName(), votant != 0 ? inst.getVote().get(map) / votant : 0, inst.getVote().get(map) == test)) {
+                            voteInv.setItem(i, item);
+                            i++;
+                        }
+                    }
+
+                    for (ItemStack item : voteToPane("Vote Aléatoire", votant != 0 ? inst.getVoteAleatoire() / votant : 0, inst.getVoteAleatoire() == test)) {
                         voteInv.setItem(i, item);
                         i++;
                     }
-                }
-
-                for(ItemStack item : voteToPane("Vote Aléatoire", votant != 0 ? inst.getVoteAleatoire()/votant : 0 , inst.getVoteAleatoire() == test ? true : false)){
-                    voteInv.setItem(i, item);
-                    i++;
                 }
             }
         }.runTaskTimer(inst, 0, 10);
