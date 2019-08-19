@@ -10,7 +10,7 @@
 
 ### 2. Statut 
 
->Je suis en train de m'occuper de la mise en place des vagues de monstres. La gestion des maps, des mobs, la database ainsi que la >création de maps intégrés au plugin sont finis. La gestion des armes n'est pas totalement fini (munitions). Il me restera ensuite à >m'occuper de l'interface (scoreboard, messages...).  
+Meilleur moment debug time !
 
 ### 3. Info 
 
