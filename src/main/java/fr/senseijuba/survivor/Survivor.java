@@ -130,6 +130,16 @@ public class Survivor extends JavaPlugin {
             }
         }
 
+        //DEBUG
+        try {
+            Utils.saveWorld(Bukkit.getWorld("world"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Utils.restoreWorld(Bukkit.getWorld("world"));
+        System.out.println("done");
+
         getServer().getPluginManager().registerEvents(new BarricadeManager(instance), instance);
         getServer().getPluginManager().registerEvents(new MobManager(), instance);
         getServer().getPluginManager().registerEvents(new VoteMapManager(instance), instance);

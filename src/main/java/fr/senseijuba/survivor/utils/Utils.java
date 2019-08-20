@@ -1,24 +1,19 @@
 package fr.senseijuba.survivor.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import fr.senseijuba.survivor.Survivor;
-import org.bukkit.Bukkit;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.FileUtil;
 import org.bukkit.util.Vector;
+
+import java.io.*;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class Utils
 {
@@ -240,11 +235,7 @@ public class Utils
 		File worldfile = world.getWorldFolder();
 		File backupfile = new File(Survivor.getInstance().getDataFolder(), ".backup/" + worldfile.getName());
 
-		if(!backupfile.exists()){
-			backupfile.createNewFile();
-		}
-
-		FileUtil.copy(worldfile, backupfile);
+        copyWorld(worldfile, backupfile);
 	}
 
 	public static void restoreWorld(World world){
@@ -316,4 +307,33 @@ public class Utils
 		}
 		return ni;
 	}
+
+    public static void copyWorld(File source, File target) {
+        try {
+            ArrayList<String> ignore = new ArrayList<String>(Arrays.asList("uid.dat", "session.dat"));
+            if (!ignore.contains(source.getName())) {
+                if (source.isDirectory()) {
+                    if (!target.exists())
+                        target.mkdirs();
+                    String[] files = source.list();
+                    for (String file : files) {
+                        File srcFile = new File(source, file);
+                        File destFile = new File(target, file);
+                        copyWorld(srcFile, destFile);
+                    }
+                } else {
+                    InputStream in = new FileInputStream(source);
+                    OutputStream out = new FileOutputStream(target);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = in.read(buffer)) > 0)
+                        out.write(buffer, 0, length);
+                    in.close();
+                    out.close();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

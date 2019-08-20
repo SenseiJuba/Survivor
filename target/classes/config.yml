@@ -1,0 +1,73 @@
+#######################################################
+# Practice Config
+# For info and help, check the Git repo over here:
+# https://github.com/RoccdoDev/Practice
+# More specifically, config documentation can be found over here:
+# https://rocco.dev/practice/config
+# If you wish to contact me privately, send me an email:
+# hey@rocco.dev
+# You may also find me on Discord: RoccoDev#1337
+# As well as on SpigotMC.org: Rocco
+########################################################
+
+########################################################
+# DOCUMENTATION
+#
+# You can use color codes with '&' (e.g., &a).
+#
+# Some config entries support parameters:
+# %1$s represents the first parameter,
+# %2$s represents the second parameter,
+# and so on.
+#########################################################
+
+
+## PREFIXES
+
+# Prefix for all information plugin messages
+prefix.info: "&a&lSurvivor §8»§7 "
+
+# Prefix for all error plugin messages
+prefix.error: "&c&lSurvivor §8»§7 "
+
+# Prefix for all chat messages
+prefix.chat: "&c[&lSurvivor&f&c]"
+
+## Timer
+# Text show on actionbar for timer before start
+# %1$s - timer
+
+startin: "La partie va commencé dans : %1$s second(s)"
+
+## DEATH
+# death message
+# %1$s - Player name
+# %2$s - Killer name
+
+death.msg: "Vous êtes mort par un %2$s"
+death.msg.all: "%1$s est mort par un %2$s, allez le réssucitez"
+
+## Inventory
+
+# Vote Map Inventory's name
+
+inventory.votemap: "Votez pour la map"
+
+# Item in Vote Map Inventory
+# %1$s - Map name
+
+inventory.votemap.pane: "Votez pour la map %1$s"
+inventory.votemap.lore: "Clicker sur l'item pour/Voter pour la map"
+
+## ATOUT
+
+# Name
+
+atout.barricade.name: "Barricade"
+
+# This message is throw when a player use a atout
+# %1$s - Player name
+
+atout.use: "" #to him in Title
+atout.use.all: "%1$s a utilisé l'atout barricade" #to each player in broadcast
+
